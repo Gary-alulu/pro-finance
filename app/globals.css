@@ -1,0 +1,363 @@
+@import "tailwindcss";
+
+/* ─── Design Token System ─────────────────────────────────────────────────── */
+/* All color, typography and spacing values live here as CSS custom properties.
+   Never hard-code hex values in component markup. Reference tokens only. */
+
+:root {
+  /* ── Brand palette ── */
+  --color-ivory:       #faf9f6;
+  --color-ivory-soft:  #f4f2ed;
+  --color-white:       #ffffff;
+  --color-surface:     #ffffff;
+  --color-surface-2:   #f7f6f3;
+  --color-surface-3:   #efede8;
+
+  /* ── Typography ── */
+  --color-text-primary:   #1a1a18;
+  --color-text-secondary: #6b6860;
+  --color-text-tertiary:  #9d9a92;
+  --color-text-inverse:   #faf9f6;
+
+  /* ── Borders ── */
+  --color-border:       #e5e2db;
+  --color-border-strong:#ccc9c1;
+
+  /* ── Emerald — positive / primary ── */
+  --color-emerald-50:  #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-900: #064e3b;
+
+  /* ── Champagne / gold — accent ── */
+  --color-gold-50:  #fdf8ee;
+  --color-gold-100: #faefd4;
+  --color-gold-300: #f0c97a;
+  --color-gold-400: #e8b84b;
+  --color-gold-500: #c49a24;
+  --color-gold-700: #8a6b14;
+
+  /* ── Coral / red — negative ── */
+  --color-coral-50:  #fff5f4;
+  --color-coral-100: #ffe4e1;
+  --color-coral-300: #fca89e;
+  --color-coral-500: #f04e3e;
+  --color-coral-600: #d63a2a;
+  --color-coral-700: #b52e20;
+
+  /* ── Semantic aliases ── */
+  --color-positive:       var(--color-emerald-600);
+  --color-positive-bg:    var(--color-emerald-50);
+  --color-negative:       var(--color-coral-600);
+  --color-negative-bg:    var(--color-coral-50);
+  --color-accent:         var(--color-gold-500);
+  --color-accent-bg:      var(--color-gold-50);
+
+  /* ── Page background ── */
+  --color-bg:             var(--color-ivory);
+  --color-bg-overlay:     rgba(26, 26, 24, 0.48);
+
+  /* ── Sidebar ── */
+  --sidebar-width:        240px;
+  --sidebar-width-collapsed: 64px;
+  --sidebar-bg:           #1a1a18;
+  --sidebar-text:         #c9c6be;
+  --sidebar-text-active:  #faf9f6;
+  --sidebar-border:       #2e2d2a;
+  --sidebar-accent:       var(--color-emerald-500);
+
+  /* ── Topbar ── */
+  --topbar-height:        60px;
+  --topbar-bg:            var(--color-surface);
+  --topbar-border:        var(--color-border);
+
+  /* ── Radius ── */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-xs:  0 1px 2px 0 rgba(26,26,24,.05);
+  --shadow-sm:  0 1px 3px 0 rgba(26,26,24,.08), 0 1px 2px -1px rgba(26,26,24,.06);
+  --shadow-md:  0 4px 12px -2px rgba(26,26,24,.10), 0 2px 4px -2px rgba(26,26,24,.06);
+  --shadow-lg:  0 10px 24px -4px rgba(26,26,24,.12), 0 4px 8px -4px rgba(26,26,24,.06);
+  --shadow-xl:  0 20px 40px -8px rgba(26,26,24,.16), 0 8px 16px -8px rgba(26,26,24,.08);
+
+  /* ── Transitions ── */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --duration-fast:   120ms;
+  --duration-normal: 200ms;
+  --duration-slow:   350ms;
+
+  /* ── Z-index scale ── */
+  --z-sidebar:  40;
+  --z-topbar:   50;
+  --z-overlay:  60;
+  --z-modal:    70;
+  --z-toast:    80;
+  --z-tooltip:  90;
+}
+
+/* ─── Dark theme ─────────────────────────────────────────────────────────── */
+.dark {
+  --color-bg:          #141412;
+  --color-surface:     #1c1b19;
+  --color-surface-2:   #222120;
+  --color-surface-3:   #2a2927;
+
+  --color-text-primary:   #f2f0ea;
+  --color-text-secondary: #9d9a92;
+  --color-text-tertiary:  #6b6860;
+  --color-text-inverse:   #1a1a18;
+
+  --color-border:       #2e2d2a;
+  --color-border-strong:#3d3c38;
+
+  --color-positive-bg:  rgba(5,150,105,.12);
+  --color-negative-bg:  rgba(240,78,62,.12);
+  --color-accent-bg:    rgba(196,154,36,.10);
+
+  --topbar-bg:          #1c1b19;
+  --topbar-border:      #2e2d2a;
+
+  --shadow-xs:  0 1px 2px 0 rgba(0,0,0,.3);
+  --shadow-sm:  0 1px 3px 0 rgba(0,0,0,.4);
+  --shadow-md:  0 4px 12px -2px rgba(0,0,0,.5);
+  --shadow-lg:  0 10px 24px -4px rgba(0,0,0,.6);
+  --shadow-xl:  0 20px 40px -8px rgba(0,0,0,.7);
+}
+
+/* ─── Base reset & typography ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Tabular figures for monetary values ── */
+.tabular-nums,
+.font-mono,
+.currency {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ─── Scrollbar styling ──────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* ─── Focus ring ─────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-emerald-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Reduced-motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Tailwind v4 theme extension ────────────────────────────────────────── */
+@theme inline {
+  /* Map CSS variables → Tailwind color tokens */
+  --color-bg:              var(--color-bg);
+  --color-surface:         var(--color-surface);
+  --color-surface-2:       var(--color-surface-2);
+  --color-surface-3:       var(--color-surface-3);
+  --color-text-primary:    var(--color-text-primary);
+  --color-text-secondary:  var(--color-text-secondary);
+  --color-text-tertiary:   var(--color-text-tertiary);
+  --color-border:          var(--color-border);
+  --color-border-strong:   var(--color-border-strong);
+  --color-positive:        var(--color-positive);
+  --color-positive-bg:     var(--color-positive-bg);
+  --color-negative:        var(--color-negative);
+  --color-negative-bg:     var(--color-negative-bg);
+  --color-accent:          var(--color-accent);
+  --color-accent-bg:       var(--color-accent-bg);
+
+  --color-emerald-50:  var(--color-emerald-50);
+  --color-emerald-100: var(--color-emerald-100);
+  --color-emerald-200: var(--color-emerald-200);
+  --color-emerald-400: var(--color-emerald-400);
+  --color-emerald-500: var(--color-emerald-500);
+  --color-emerald-600: var(--color-emerald-600);
+  --color-emerald-700: var(--color-emerald-700);
+  --color-emerald-900: var(--color-emerald-900);
+
+  --color-gold-50:  var(--color-gold-50);
+  --color-gold-300: var(--color-gold-300);
+  --color-gold-400: var(--color-gold-400);
+  --color-gold-500: var(--color-gold-500);
+
+  --color-coral-50:  var(--color-coral-50);
+  --color-coral-500: var(--color-coral-500);
+  --color-coral-600: var(--color-coral-600);
+
+  --color-sidebar-bg:     #1a1a18;
+  --color-sidebar-text:   #c9c6be;
+  --color-sidebar-border: #2e2d2a;
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --radius-sm:   var(--radius-sm);
+  --radius-md:   var(--radius-md);
+  --radius-lg:   var(--radius-lg);
+  --radius-xl:   var(--radius-xl);
+  --radius-full: var(--radius-full);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+}
+
+/* ─── Utility classes ────────────────────────────────────────────────────── */
+.surface {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.metric-value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.02em;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-gradient-emerald {
+  background: linear-gradient(135deg, var(--color-emerald-600), var(--color-emerald-400));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Auth form primitives ────────────────────────────────────────────────── */
+.auth-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem 0.625rem 2.625rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-strong);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+.auth-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+.auth-input:focus {
+  border-color: var(--color-emerald-500);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+.auth-input-error {
+  border-color: var(--color-coral-500);
+}
+.auth-input-error:focus {
+  border-color: var(--color-coral-500);
+  box-shadow: 0 0 0 3px rgba(240, 78, 62, 0.12);
+}
+.auth-select {
+  padding-left: 2.625rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239d9a92' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+}
+.auth-btn-primary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6875rem 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #faf9f6;
+  background: linear-gradient(135deg, var(--color-emerald-600), var(--color-emerald-700));
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(4, 120, 87, 0.35);
+  transition: transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out);
+}
+.auth-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(4, 120, 87, 0.35);
+}
+.auth-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+.auth-btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.auth-link {
+  font-weight: 500;
+  color: var(--color-emerald-600);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+.auth-link:hover {
+  color: var(--color-emerald-700);
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────────────────── */
+.sidebar-transition {
+  transition: width var(--duration-slow) var(--ease-out);
+  will-change: width;
+}
+
+/* ─── React Flow customisation ───────────────────────────────────────────── */
+.react-flow__attribution {
+  display: none !important;
+}
+.react-flow__node {
+  font-family: var(--font-geist-sans), ui-sans-serif;
+}
