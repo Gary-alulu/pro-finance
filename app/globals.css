@@ -302,6 +302,9 @@ body {
   border-color: var(--color-coral-500);
   box-shadow: 0 0 0 3px rgba(240, 78, 62, 0.12);
 }
+.auth-input-password {
+  padding-left: 0.875rem;
+}
 .auth-select {
   padding-left: 2.625rem;
   appearance: none;

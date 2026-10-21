@@ -66,7 +66,8 @@ npm run lint    # eslint
 ## Architecture notes
 
 - `app/(app)/*` — authenticated pages; `app/api/*` — JSON route handlers (all enforce `requireUserId()`).
-- `auth.js` — Auth.js v5 config: credentials provider, JWT sessions, login rate-limiting (5 fails / 15 min → 15 min lockout), proxy-level fail-closed page protection.
+- `auth.js` — Auth.js v5 config: credentials provider, JWT sessions, login rate-limiting (5 fails / 15 min → 15 min lockout), proxy-level fail-closed page protection, optional "remember me" (30-day session vs. 24-hour default).
+- `components/providers/SessionProvider.js` — client session context; profile edits call `useSession().update()` so the `jwt` callback refreshes name/email/currency claims without a re-login.
 - `proxy.js` — redirects unauthenticated page traffic to `/login`; API routes return JSON 401s from their handlers.
 - `lib/finance/` — Decimal.js money math (average cost, market value, cashflow, FX).
 - `lib/accountability/engine.js` — pure integrity checks (unit-tested).
@@ -95,6 +96,7 @@ JSON body → readJsonBody (sanitize) → zod schema (validate + coerce) → Obj
 - **Input validation**: shared zod schemas on every mutation — type checks, trimmed text, length caps, currency/enum whitelists; malformed JSON returns 400.
 - Security headers on every response (CSP, nosniff, frame-deny, referrer policy, permissions policy; HSTS in production).
 - Login rate limiting (5 fails / 15 min → 15 min lockout) is in-memory — single instance only. Multi-instance deployments need a shared store (e.g. Redis).
+- Profile changes (name, email, password) require the current password and are audit-logged; the email field is the login credential, so a change takes effect on the next sign-in. Changing the password does not revoke other already-issued JWTs (rotate `NEXTAUTH_SECRET` to force a global sign-out).
 - File downloads: sanitized `Content-Disposition` (ASCII fallback + RFC 5987 `filename*`) and `nosniff`.
 - Audit IPs are taken from the right-most (trusted proxy) `x-forwarded-for` hop.
 
@@ -104,4 +106,4 @@ JSON body → readJsonBody (sanitize) → zod schema (validate + coerce) → Obj
 npm test
 ```
 
-Covers: missing-vs-zero valuation semantics, overdue-vs-upcoming maturity, average-cost trade math, dividend tracking, FX conversion rules, recorded net worth, accountability findings/reminders, CSV quoting and formula-injection guard, input sanitization (tag/control-char stripping, password-key preservation).
+Covers: missing-vs-zero valuation semantics, overdue-vs-upcoming maturity, average-cost trade math, dividend tracking, FX conversion rules, recorded net worth, accountability findings/reminders, CSV quoting and formula-injection guard, input sanitization (tag/control-char stripping, password-key preservation), profile-change schema rules (email/name/password validation).

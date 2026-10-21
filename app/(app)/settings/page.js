@@ -5,8 +5,8 @@ import { auth } from "@/auth";
 import SettingsClient from "./SettingsClient";
 
 export const metadata = {
-  title: "Settings & Preferences",
-  description: "Manage default currency, privacy settings, and demo data.",
+  title: "Settings & Profile",
+  description: "Manage your account profile, credentials, and reporting currency.",
 };
 
 export default async function SettingsPage() {

@@ -9,7 +9,7 @@ import { UserPlus, Mail, Lock, User, Coins, CheckCircle2, Circle } from "lucide-
 import { motion, AnimatePresence } from "framer-motion";
 import { registerSchema } from "@/lib/validations/schemas";
 import { SUPPORTED_CURRENCIES } from "@/lib/finance/currency";
-import { Field, PasswordInput, ErrorBanner, SubmitButton } from "@/components/auth/AuthUI";
+import { Field, PasswordInput, ErrorBanner, SubmitButton, noPaste } from "@/components/auth/AuthUI";
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -152,6 +152,10 @@ export default function RegisterPage() {
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
+            onPaste={noPaste}
+            onDrop={noPaste}
+            onCut={noPaste}
+            title="Pasting is disabled for security — type your email"
             className={`auth-input${errors.email ? " auth-input-error" : ""}`}
             {...register("email")}
           />

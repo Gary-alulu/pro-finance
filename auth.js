@@ -20,6 +20,14 @@ const LOGIN_MAX_ATTEMPTS = 5;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_LOCKOUT_MS = 15 * 60 * 1000;
 
+// ── Remember me ──────────────────────────────────────────────────────────────
+// Remembered sessions last the full default (30 days). Un-remembered sessions
+// expire after NON_REMEMBER_MAX_AGE. Enforced in the jwt callback by rejecting
+// stale tokens — a JWT's own exp is the full session maxAge, so we age out
+// non-remembered tokens ourselves and hand back null to kill the session.
+const REMEMBER_MAX_AGE = 30 * 24 * 60 * 60; // 30 days (seconds)
+const NON_REMEMBER_MAX_AGE = 24 * 60 * 60; // 24 hours (seconds)
+
 function loginKey(email) {
   return String(email).toLowerCase().trim();
 }
@@ -63,6 +71,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        rememberMe: { label: "Remember me", type: "checkbox" },
       },
       async authorize(credentials) {
         // M-3: strictly type-check credentials before use
@@ -95,17 +104,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         recordSuccessfulLogin(email);
 
+        const remember =
+          credentials?.rememberMe === true || credentials?.rememberMe === "true";
+
         return {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
           preferredCurrency: user.preferredCurrency || "KES",
+          remember,
         };
       },
     }),
   ],
 
-  session: { strategy: "jwt" },
+  // JWT cookie lives the full 30 days; non-remembered tokens are aged out
+  // manually in the jwt callback (see NON_REMEMBER_MAX_AGE).
+  session: { strategy: "jwt", maxAge: REMEMBER_MAX_AGE },
 
   pages: {
     signIn: "/login",
@@ -119,10 +134,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (request.nextUrl.pathname.startsWith("/api/")) return true;
       return !!auth;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
         token.preferredCurrency = user.preferredCurrency;
+        // Auth.js v5 bug: user fields not in the default JWT shape (name/email)
+        // are NOT auto-copied for credentials logins — map them explicitly.
+        token.name = user.name;
+        token.email = user.email;
+        token.remember = user.remember === true;
+        token.loginAt = Math.floor(Date.now() / 1000);
+      }
+      // Remember me = false → expire the session after NON_REMEMBER_MAX_AGE.
+      // Missing claim (older tokens) is treated as remembered for back-compat.
+      if (token.loginAt && token.remember !== true) {
+        if (Math.floor(Date.now() / 1000) - token.loginAt > NON_REMEMBER_MAX_AGE) {
+          return null;
+        }
+      }
+      // Profile edits: refresh token claims from DB so name/email changes
+      // show immediately without forcing a re-login.
+      if (trigger === "update" && token.id) {
+        await connectDB();
+        const fresh = await User.findById(token.id).lean();
+        if (fresh) {
+          token.name = fresh.name;
+          token.email = fresh.email;
+          token.preferredCurrency = fresh.preferredCurrency;
+        }
       }
       return token;
     },
@@ -130,6 +169,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token) {
         session.user.id = token.id;
         session.user.preferredCurrency = token.preferredCurrency;
+        session.user.remember = token.remember === true;
       }
       return session;
     },

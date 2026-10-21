@@ -9,6 +9,14 @@ import { useState } from "react";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
+const ease = [0.16, 1, 0.3, 1];
+
+// Security: credentials must be typed, never pasted — blocks paste, drop,
+// and cut so clipboard content from other sites can't land in these fields.
+export function noPaste(event) {
+  event.preventDefault();
+}
+
 export function Field({ id, label, icon: Icon, error, children }) {
   return (
     <div className="space-y-1.5">
@@ -59,6 +67,10 @@ export function PasswordInput({
         autoComplete={autoComplete}
         placeholder={placeholder}
         className={`auth-input pr-10${error ? " auth-input-error" : ""}`}
+        onPaste={noPaste}
+        onDrop={noPaste}
+        onCut={noPaste}
+        title="Pasting is disabled for security — type your password"
         {...registration}
       />
       <button
