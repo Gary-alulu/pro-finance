@@ -25,11 +25,11 @@ async function postHandler(request) {
   const passwordHash = await bcrypt.hash(password, 12);
 
   // M-4: atomic single-owner claim — upsert against the singleton isOwner
-  // slot. If a user already exists the filter matches it and we 409; if not,
-  // $setOnInsert creates the first user. Concurrent races surface as E11000
-  // on the partial unique index (or return the winner's doc).
+  // slot. includeResultMetadata tells us whether the upsert inserted a new
+  // doc or matched the existing owner (same email or not → 409). Concurrent
+  // races surface as E11000 on the partial unique index.
   try {
-    const user = await User.findOneAndUpdate(
+    const result = await User.findOneAndUpdate(
       { isOwner: true },
       {
         $setOnInsert: {
@@ -40,16 +40,22 @@ async function postHandler(request) {
           isOwner: true,
         },
       },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+        includeResultMetadata: true,
+      }
     );
 
-    if (user.email !== normalizedEmail) {
+    if (result.lastErrorObject?.updatedExisting) {
       return NextResponse.json(
         { error: "An account already exists. This platform is single-owner." },
         { status: 409 }
       );
     }
 
+    const user = result.value;
     return NextResponse.json(
       { message: "Account created successfully", userId: user._id.toString() },
       { status: 201 }
