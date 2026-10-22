@@ -143,7 +143,7 @@ export default function FinancialMapCanvas() {
   }, [visibleNodes, search]);
 
   return (
-    <div className="relative w-full h-[calc(100vh-140px)] min-h-[580px] rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs overflow-hidden">
+    <div className="relative w-full h-[calc(100vh-220px)] min-h-[520px] rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs overflow-hidden">
       {/* ── Top Floating Toolbar ────────────────────────────────────────── */}
       <div className="absolute top-4 left-4 right-4 z-10 flex flex-wrap items-center gap-2 pointer-events-none">
         <div className="flex flex-wrap items-center gap-2 bg-[var(--color-surface)]/90 backdrop-blur-md p-1.5 rounded-xl border border-[var(--color-border)] shadow-sm pointer-events-auto">

@@ -3,6 +3,7 @@
 // Illustrated empty state for lists, charts, and data-free sections.
 
 import { motion } from "framer-motion";
+import Button from "@/components/ui/Button";
 
 export default function EmptyState({
   icon: Icon,
@@ -59,7 +60,16 @@ export default function EmptyState({
         </p>
       )}
 
-      {action && <div className="mt-5">{action}</div>}
+      {action &&
+        (typeof action === "object" && action !== null && ("label" in action || "onClick" in action) ? (
+          <div className="mt-5">
+            <Button onClick={action.onClick} disabled={action.disabled}>
+              {action.label}
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-5">{action}</div>
+        ))}
     </motion.div>
   );
 }

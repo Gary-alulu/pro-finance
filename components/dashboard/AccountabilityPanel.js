@@ -28,11 +28,13 @@ const TYPE_LABELS = {
   unlinked_transaction: "Unlinked transaction",
 };
 
-export default function AccountabilityPanel() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function AccountabilityPanel({ initialItems = null }) {
+  const [items, setItems] = useState(initialItems || []);
+  const [loading, setLoading] = useState(initialItems === null);
 
   useEffect(() => {
+    if (initialItems !== null) return;
+
     async function load() {
       try {
         const res = await fetch("/api/accountability?status=open&limit=6");
@@ -46,14 +48,15 @@ export default function AccountabilityPanel() {
       }
     }
     load();
-  }, []);
+  }, [initialItems]);
 
   return (
     <div
-      className="rounded-xl p-5"
+      className="p-5 h-full flex flex-col"
       style={{
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
+        borderRadius: "var(--radius-lg)",
         boxShadow: "var(--shadow-sm)",
       }}
     >
@@ -73,7 +76,7 @@ export default function AccountabilityPanel() {
       </div>
 
       {loading ? (
-        <div className="space-y-3">
+        <div className="flex-1 space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex gap-3 items-start">
               <SkeletonLoader className="w-6 h-6 rounded-lg flex-shrink-0" />
@@ -85,14 +88,16 @@ export default function AccountabilityPanel() {
           ))}
         </div>
       ) : items.length === 0 ? (
-        <EmptyState
-          icon={ShieldCheck}
-          title="All clear"
-          description="No open accountability items. Great financial hygiene!"
-          compact
-        />
+        <div className="flex-1 flex items-center justify-center">
+          <EmptyState
+            icon={ShieldCheck}
+            title="All clear"
+            description="No open accountability items. Great financial hygiene!"
+            compact
+          />
+        </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="flex-1 space-y-2">
           {items.map((item) => {
             const cfg = SEVERITY_CONFIG[item.severity] || SEVERITY_CONFIG.low;
             const Icon = cfg.icon;

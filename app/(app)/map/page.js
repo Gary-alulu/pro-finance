@@ -1,7 +1,7 @@
 // app/(app)/map/page.js
 // Interactive connected Financial Map page.
 
-import FinancialMapCanvas from "@/components/map/FinancialMapCanvas";
+import FinancialMapLoader from "@/components/map/FinancialMapLoader";
 
 export const metadata = {
   title: "Financial Map",
@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function MapPage() {
   return (
-    <div className="space-y-4">
+    <div className="p-6 md:p-8 space-y-4 max-w-screen-2xl mx-auto">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
           Interactive Financial Map
@@ -20,7 +20,7 @@ export default function MapPage() {
         </p>
       </div>
 
-      <FinancialMapCanvas />
+      <FinancialMapLoader />
     </div>
   );
 }

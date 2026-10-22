@@ -46,9 +46,9 @@ async function postHandler(request) {
   await connectDB();
 
   const [assets, liabilities, holdings, rateDocs] = await Promise.all([
-    Asset.find({ ownerId: userId, status: "active" }).lean(),
+    Asset.find({ ownerId: userId, status: "active" }).select("-valuationHistory").lean(),
     Liability.find({ ownerId: userId, status: "active" }).lean(),
-    InvestmentHolding.find({ ownerId: userId, status: "active" }).lean(),
+    InvestmentHolding.find({ ownerId: userId, status: "active" }).select("-priceHistory").lean(),
     ExchangeRate.find({ ownerId: userId }).lean(),
   ]);
 

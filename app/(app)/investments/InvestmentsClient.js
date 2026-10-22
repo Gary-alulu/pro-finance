@@ -3,6 +3,7 @@
 // Portfolio manager for equities, bonds, REITs, funds, and alternative holdings.
 
 import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -30,6 +31,14 @@ import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
+
+// Recharts is ~395 KB — keep the chart out of the initial investments bundle.
+const InvestmentPerformanceChart = dynamic(
+  () => import("@/components/charts/InvestmentPerformanceChart"),
+  {
+    loading: () => <SkeletonLoader className="h-72 w-full rounded-[var(--radius-lg)]" />,
+  }
+);
 
 const investmentTypeLabels = {
   listed_equity: { label: "Public Equities / Stocks", tone: "emerald" },
@@ -260,7 +269,7 @@ export default function InvestmentsClient({ user, focusId = null, newRecord = fa
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 md:p-8 space-y-6 max-w-screen-2xl mx-auto">
       {/* ── Top Header ──────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -386,6 +395,13 @@ export default function InvestmentsClient({ user, focusId = null, newRecord = fa
           </p>
         </div>
       </div>
+
+      {/* ── Performance chart ───────────────────────────────────────────── */}
+      <InvestmentPerformanceChart
+        currency={user?.preferredCurrency || "KES"}
+        holdings={holdings}
+        loading={loading}
+      />
 
       {/* ── Filters & Search ────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs">

@@ -5,17 +5,25 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
-import CommandPalette from "@/components/ui/CommandPalette";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
+
+// Command palette (framer-motion + 300 lines) is only needed once the user
+// opens it — keep it out of the shell's initial client bundle.
+const CommandPalette = dynamic(() => import("@/components/ui/CommandPalette"), {
+  ssr: false,
+});
 
 export default function AppShell({ user, children }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  // Mount the palette bundle only after it is first requested.
+  const [paletteMounted, setPaletteMounted] = useState(false);
   const pathname = usePathname();
 
   // Close mobile sidebar when the route changes (adjust-during-render pattern)
@@ -39,12 +47,17 @@ export default function AppShell({ user, children }) {
     function onKeyDown(e) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setPaletteOpen((v) => !v);
+        openPalette();
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  function openPalette() {
+    setPaletteMounted(true);
+    setPaletteOpen((v) => !v);
+  }
 
   function toggleSidebar() {
     setSidebarCollapsed((v) => {
@@ -117,7 +130,7 @@ export default function AppShell({ user, children }) {
             <TopBar
               user={user}
               onMobileMenuToggle={() => setMobileSidebarOpen((v) => !v)}
-              onSearchOpen={() => setPaletteOpen(true)}
+              onSearchOpen={openPalette}
             />
 
             {/* Page content */}
@@ -139,8 +152,10 @@ export default function AppShell({ user, children }) {
             </main>
           </div>
 
-          {/* Global command palette */}
-          <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+          {/* Global command palette — mounted lazily on first open */}
+          {paletteMounted && (
+            <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+          )}
         </div>
       </ToastProvider>
     </ThemeProvider>

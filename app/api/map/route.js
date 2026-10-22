@@ -18,10 +18,10 @@ async function getHandler() {
 
   const [assets, liabilities, investments, documents, transactions, relationships] =
     await Promise.all([
-      Asset.find({ ownerId: userId, status: "active" }).lean(),
+      Asset.find({ ownerId: userId, status: "active" }).select("-valuationHistory").lean(),
       Liability.find({ ownerId: userId, status: "active" }).lean(),
-      InvestmentHolding.find({ ownerId: userId, status: "active" }).lean(),
-      Document.find({ ownerId: userId }).sort({ uploadedAt: -1 }).limit(30).lean(),
+      InvestmentHolding.find({ ownerId: userId, status: "active" }).select("-priceHistory").lean(),
+      Document.find({ ownerId: userId }).select("-storageKey -extractionResult.rawText").sort({ uploadedAt: -1 }).limit(30).lean(),
       Transaction.find({ ownerId: userId }).sort({ date: -1 }).limit(20).lean(),
       RecordRelationship.find({ ownerId: userId }).lean(),
     ]);

@@ -3,6 +3,7 @@
 // High-craft transaction ledger with evidence verification, linked records, and decimal safety.
 
 import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -33,6 +34,11 @@ import Modal from "@/components/ui/Modal";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 
+// Recharts is ~395 KB — keep the chart out of the initial transactions bundle.
+const TransactionFlowChart = dynamic(() => import("@/components/charts/TransactionFlowChart"), {
+  loading: () => <SkeletonLoader className="h-72 w-full rounded-[var(--radius-lg)]" />,
+});
+
 const categoryLabels = {
   income: { label: "Income & Salary", tone: "emerald" },
   expense: { label: "Expense", tone: "coral" },
@@ -53,6 +59,7 @@ export default function TransactionsClient({ user, focusId = null, newRecord = f
   const [transactions, setTransactions] = useState([]);
   const [assets, setAssets] = useState([]);
   const [liabilities, setLiabilities] = useState([]);
+  const [monthlyCashFlow, setMonthlyCashFlow] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
@@ -92,10 +99,13 @@ export default function TransactionsClient({ user, focusId = null, newRecord = f
 
   const fetchData = async () => {
     try {
-      const [txRes, assetsRes, liabilitiesRes] = await Promise.all([
+      const [txRes, assetsRes, liabilitiesRes, cashflowRes] = await Promise.all([
         fetch("/api/transactions"),
         fetch("/api/assets"),
         fetch("/api/liabilities"),
+        // The monthly series is aggregated server-side — the paginated
+        // transaction list above only holds the most recent rows.
+        fetch("/api/reports/cashflow?months=12"),
       ]);
 
       if (txRes.ok) {
@@ -109,6 +119,10 @@ export default function TransactionsClient({ user, focusId = null, newRecord = f
       if (liabilitiesRes.ok) {
         const data = await liabilitiesRes.json();
         setLiabilities(data.liabilities || []);
+      }
+      if (cashflowRes.ok) {
+        const data = await cashflowRes.json();
+        setMonthlyCashFlow(data.monthly || []);
       }
     } catch (err) {
       console.error("Error fetching transactions data:", err);
@@ -228,7 +242,7 @@ export default function TransactionsClient({ user, focusId = null, newRecord = f
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 md:p-8 space-y-6 max-w-screen-2xl mx-auto">
       {/* ── Top Header ──────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -348,6 +362,13 @@ export default function TransactionsClient({ user, focusId = null, newRecord = f
           </p>
         </div>
       </div>
+
+      {/* ── Transaction flow chart ──────────────────────────────────────── */}
+      <TransactionFlowChart
+        currency={user?.preferredCurrency || "KES"}
+        monthly={monthlyCashFlow}
+        loading={loading}
+      />
 
       {/* ── Filter Toolbar ──────────────────────────────────────────────── */}
       <div className="p-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">

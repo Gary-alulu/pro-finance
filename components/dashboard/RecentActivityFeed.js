@@ -17,11 +17,13 @@ const DIRECTION_CONFIG = {
   unknown:  { icon: ArrowLeftRight, color: "var(--color-text-tertiary)", bg: "var(--color-surface-2)" },
 };
 
-export default function RecentActivityFeed({ currency = "KES" }) {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function RecentActivityFeed({ currency = "KES", initialTransactions = null }) {
+  const [transactions, setTransactions] = useState(initialTransactions || []);
+  const [loading, setLoading] = useState(initialTransactions === null);
 
   useEffect(() => {
+    if (initialTransactions !== null) return;
+
     async function load() {
       try {
         const res = await fetch("/api/transactions?limit=8&sort=-date");
@@ -35,14 +37,15 @@ export default function RecentActivityFeed({ currency = "KES" }) {
       }
     }
     load();
-  }, []);
+  }, [initialTransactions]);
 
   return (
     <div
-      className="rounded-xl p-5"
+      className="p-5 h-full flex flex-col"
       style={{
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
+        borderRadius: "var(--radius-lg)",
         boxShadow: "var(--shadow-sm)",
       }}
     >
@@ -62,7 +65,7 @@ export default function RecentActivityFeed({ currency = "KES" }) {
       </div>
 
       {loading ? (
-        <div className="space-y-3">
+        <div className="flex-1 space-y-3">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex items-center gap-3">
               <SkeletonLoader className="w-8 h-8 rounded-lg flex-shrink-0" />
@@ -75,14 +78,16 @@ export default function RecentActivityFeed({ currency = "KES" }) {
           ))}
         </div>
       ) : transactions.length === 0 ? (
-        <EmptyState
-          icon={Clock}
-          title="No transactions yet"
-          description="Record your first transaction to see activity here."
-          compact
-        />
+        <div className="flex-1 flex items-center justify-center">
+          <EmptyState
+            icon={Clock}
+            title="No transactions yet"
+            description="Record your first transaction to see activity here."
+            compact
+          />
+        </div>
       ) : (
-        <ul className="space-y-1">
+        <ul className="flex-1 space-y-1">
           {transactions.map((tx) => {
             const cfg = DIRECTION_CONFIG[tx.direction] || DIRECTION_CONFIG.unknown;
             const Icon = cfg.icon;

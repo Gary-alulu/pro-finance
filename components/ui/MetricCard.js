@@ -23,10 +23,11 @@ export default function MetricCard({
   const card = (
     <div
       id={id}
-      className="rounded-xl p-5 h-full"
+      className="p-5 h-full flex flex-col"
       style={{
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
+        borderRadius: "var(--radius-lg)",
         boxShadow: "var(--shadow-sm)",
       }}
     >
@@ -42,7 +43,7 @@ export default function MetricCard({
       ) : (
         <>
           <p
-            className="metric-value text-2xl font-semibold mb-2"
+            className="metric-value text-2xl font-semibold"
             style={{
               color: positive === true
                 ? "var(--color-positive)"
@@ -56,13 +57,13 @@ export default function MetricCard({
           </p>
 
           {subValue && (
-            <p className="text-xs mb-2" style={{ color: "var(--color-text-tertiary)" }}>
+            <p className="text-xs mt-1.5" style={{ color: "var(--color-text-tertiary)" }}>
               {subValue}
             </p>
           )}
 
           {change && (
-            <div className="flex items-center gap-1.5 text-xs">
+            <div className="flex items-center gap-1.5 text-xs mt-auto pt-3">
               {positiveChange ? (
                 <TrendingUp size={13} style={{ color: "var(--color-positive)" }} />
               ) : negativeChange ? (

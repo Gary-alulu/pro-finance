@@ -17,7 +17,7 @@ async function getHandler(request, { params }) {
   }
 
   await connectDB();
-  const doc = await Document.findById(id);
+  const doc = await Document.findById(id).lean();
 
   if (!doc) {
     return NextResponse.json({ error: "Document not found" }, { status: 404 });

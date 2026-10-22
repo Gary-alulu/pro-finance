@@ -23,9 +23,9 @@ async function handler(request) {
   const asOfParam = searchParams.get("asOf");
 
   const [assets, liabilities, investments, rateDocs] = await Promise.all([
-    Asset.find({ ownerId: userId, status: "active" }).lean(),
+    Asset.find({ ownerId: userId, status: "active" }).select("-valuationHistory").lean(),
     Liability.find({ ownerId: userId, status: "active" }).lean(),
-    InvestmentHolding.find({ ownerId: userId, status: "active" }).lean(),
+    InvestmentHolding.find({ ownerId: userId, status: "active" }).select("-priceHistory").lean(),
     ExchangeRate.find({ ownerId: userId }).lean(),
   ]);
 

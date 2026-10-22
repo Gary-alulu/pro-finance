@@ -3,6 +3,7 @@
 // Main dashboard client component. Fetches summary data from API.
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -20,8 +21,21 @@ import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import AccountabilityPanel from "@/components/dashboard/AccountabilityPanel";
 import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
-import WealthTrendChart from "@/components/dashboard/WealthTrendChart";
-import AssetAllocationChart from "@/components/dashboard/AssetAllocationChart";
+
+// Recharts is ~395 KB — keep it out of the initial dashboard bundle and
+// hydrate the charts only when they scroll into view / after first paint.
+const WealthTrendChart = dynamic(() => import("@/components/dashboard/WealthTrendChart"), {
+  loading: () => <SkeletonLoader className="h-72 w-full" />,
+});
+const AssetAllocationChart = dynamic(() => import("@/components/dashboard/AssetAllocationChart"), {
+  loading: () => <SkeletonLoader className="h-72 w-full" />,
+});
+const NetWorthCompositionChart = dynamic(
+  () => import("@/components/charts/NetWorthCompositionChart"),
+  {
+    loading: () => <SkeletonLoader className="h-72 w-full" />,
+  }
+);
 
 const STAGGER = {
   container: { animate: { transition: { staggerChildren: 0.07 } } },
@@ -31,15 +45,26 @@ const STAGGER = {
   },
 };
 
-export default function OverviewClient({ user }) {
-  const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function OverviewClient({
+  user,
+  initialSummary = null,
+  initialAttention = null,
+  initialSnapshots = null,
+  initialAllocation = null,
+  initialTransactions = null,
+  initialAccountability = null,
+}) {
+  const [summary, setSummary] = useState(initialSummary);
+  const [loading, setLoading] = useState(initialSummary === null);
   const [error, setError] = useState(null);
   const [hideValues, setHideValues] = useState(false);
-  const [attention, setAttention] = useState(null);
+  const [attention, setAttention] = useState(initialAttention);
   const currency = user?.preferredCurrency || "KES";
 
   useEffect(() => {
+    // Server already provided the summary — only fetch if it was missing.
+    if (initialSummary !== null) return;
+
     async function load() {
       try {
         setLoading(true);
@@ -62,7 +87,7 @@ export default function OverviewClient({ user }) {
         if (data?.summary) setAttention(data.summary);
       })
       .catch(() => {});
-  }, []);
+  }, [initialSummary]);
 
   const netWorth = summary?.netWorth ?? null;
   const totalAssets = summary?.totalAssets ?? null;
@@ -82,15 +107,16 @@ export default function OverviewClient({ user }) {
         initial="initial"
         animate="animate"
         variants={STAGGER.container}
-        className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5"
+        className="grid gap-4 grid-cols-1 sm:grid-cols-3 xl:grid-cols-5"
       >
         {/* Net worth hero card */}
-        <motion.div variants={STAGGER.item} className="sm:col-span-2">
+        <motion.div variants={STAGGER.item} className="sm:col-span-3 xl:col-span-2">
           <div
-            className="rounded-xl p-6 relative overflow-hidden"
+            className="p-6 relative overflow-hidden h-full flex flex-col"
             style={{
               background: "linear-gradient(135deg, #0d2116 0%, #1c3828 100%)",
               border: "1px solid rgba(16,185,129,0.2)",
+              borderRadius: "var(--radius-lg)",
               boxShadow: "var(--shadow-lg)",
             }}
           >
@@ -104,16 +130,16 @@ export default function OverviewClient({ user }) {
               {hideValues ? <Eye size={15} /> : <EyeOff size={15} />}
             </button>
 
-            <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.45)" }}>
               Recorded Net Worth
             </p>
 
             {loading ? (
-              <div className="h-10 w-48 rounded-lg bg-white/10 animate-pulse mt-2 mb-4" />
+              <div className="h-10 w-48 rounded-lg bg-white/10 animate-pulse mt-3 mb-4" />
             ) : error ? (
-              <p className="text-2xl font-light mt-2 mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>—</p>
+              <p className="text-2xl font-light mt-3 mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>—</p>
             ) : (
-              <div className="mt-2 mb-4">
+              <div className="mt-3 mb-4">
                 <span
                   className="metric-value font-semibold"
                   style={{
@@ -130,7 +156,7 @@ export default function OverviewClient({ user }) {
             )}
 
             {!loading && !error && hasData && (
-              <div className="flex items-center gap-4 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                 <span>
                   Assets:{" "}
                   <strong style={{ color: "var(--color-emerald-400)" }}>
@@ -148,7 +174,7 @@ export default function OverviewClient({ user }) {
 
             {/* Disclosure */}
             <div
-              className="flex items-start gap-2 mt-4 pt-4 text-xs"
+              className="flex items-start gap-2 mt-auto pt-4 text-xs"
               style={{
                 borderTop: "1px solid rgba(255,255,255,0.1)",
                 color: "rgba(255,255,255,0.35)",
@@ -191,7 +217,7 @@ export default function OverviewClient({ user }) {
             href: "/accountability",
           },
         ].map((m) => (
-          <motion.div key={m.id} variants={STAGGER.item}>
+          <motion.div key={m.id} variants={STAGGER.item} className="h-full">
             <MetricCard {...m} loading={loading} />
           </motion.div>
         ))}
@@ -202,26 +228,42 @@ export default function OverviewClient({ user }) {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.15 }}
-        className="grid gap-4 grid-cols-1 lg:grid-cols-3"
+        className="grid gap-4 grid-cols-1 lg:grid-cols-3 items-stretch"
       >
         {/* Wealth trend — spans 2 cols */}
-        <div className="lg:col-span-2">
-          <WealthTrendChart currency={currency} />
+        <div className="lg:col-span-2 h-full">
+          <WealthTrendChart currency={currency} initialSnapshots={initialSnapshots} />
         </div>
 
-        {/* Asset allocation */}
-        <AssetAllocationChart currency={currency} />
+        {/* Net worth composition */}
+        <div className="h-full">
+          <NetWorthCompositionChart
+            currency={currency}
+            assetsTotal={summary?.assetsTotal ?? null}
+            holdingsTotal={summary?.holdingsTotal ?? null}
+            totalLiabilities={summary?.totalLiabilities ?? null}
+            netWorth={summary?.netWorth ?? null}
+            loading={loading}
+          />
+        </div>
       </motion.div>
 
-      {/* ── Accountability + Activity row ──────────────────────────────── */}
+      {/* ── Allocation + Accountability + Activity row ──────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.25 }}
-        className="grid gap-4 grid-cols-1 lg:grid-cols-2"
+        className="grid gap-4 grid-cols-1 lg:grid-cols-3 items-stretch"
       >
-        <AccountabilityPanel />
-        <RecentActivityFeed currency={currency} />
+        <div className="h-full">
+          <AssetAllocationChart currency={currency} initialData={initialAllocation} />
+        </div>
+        <div className="h-full">
+          <AccountabilityPanel initialItems={initialAccountability} />
+        </div>
+        <div className="h-full">
+          <RecentActivityFeed currency={currency} initialTransactions={initialTransactions} />
+        </div>
       </motion.div>
     </div>
   );

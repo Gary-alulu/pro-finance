@@ -230,7 +230,7 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 md:p-8 space-y-6 max-w-screen-2xl mx-auto">
       {/* ── Notification Banner ─────────────────────────────────────────── */}
       <AnimatePresence>
         {successBanner && (

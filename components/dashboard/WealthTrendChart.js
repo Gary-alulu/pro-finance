@@ -45,12 +45,14 @@ function CustomTooltip({ active, payload, label, currency }) {
   );
 }
 
-export default function WealthTrendChart({ currency = "KES" }) {
-  const [snapshots, setSnapshots] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function WealthTrendChart({ currency = "KES", initialSnapshots = null }) {
+  const [snapshots, setSnapshots] = useState(initialSnapshots || []);
+  const [loading, setLoading] = useState(initialSnapshots === null);
   const [period, setPeriod] = useState("All");
 
   useEffect(() => {
+    if (initialSnapshots !== null) return;
+
     async function load() {
       try {
         const res = await fetch("/api/networth/snapshots");
@@ -64,7 +66,7 @@ export default function WealthTrendChart({ currency = "KES" }) {
       }
     }
     load();
-  }, []);
+  }, [initialSnapshots]);
 
   const currentPeriod = PERIODS.find((p) => p.label === period);
   const filtered = currentPeriod?.months
@@ -82,10 +84,11 @@ export default function WealthTrendChart({ currency = "KES" }) {
 
   return (
     <div
-      className="rounded-xl p-5 h-full"
+      className="p-5 h-full flex flex-col"
       style={{
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
+        borderRadius: "var(--radius-lg)",
         boxShadow: "var(--shadow-sm)",
       }}
     >
@@ -123,18 +126,20 @@ export default function WealthTrendChart({ currency = "KES" }) {
       </div>
 
       {loading ? (
-        <div className="h-48 space-y-3">
+        <div className="flex-1" style={{ minHeight: "12rem" }}>
           <SkeletonLoader className="h-full w-full rounded-lg" />
         </div>
       ) : chartData.length < 2 ? (
-        <EmptyState
-          icon={TrendingUp}
-          title="No trend data yet"
-          description="Net worth snapshots will appear here as you record financial data over time. The chart will never fabricate historical values."
-          compact
-        />
+        <div className="flex-1 flex items-center justify-center" style={{ minHeight: "12rem" }}>
+          <EmptyState
+            icon={TrendingUp}
+            title="No trend data yet"
+            description="Net worth snapshots will appear here as you record financial data over time. The chart will never fabricate historical values."
+            compact
+          />
+        </div>
       ) : (
-        <div className="h-48">
+        <div className="flex-1" style={{ minHeight: "12rem" }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />

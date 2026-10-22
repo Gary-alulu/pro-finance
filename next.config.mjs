@@ -48,6 +48,18 @@ const nextConfig = {
       },
     },
   },
+  experimental: {
+    // Dev-only: defer compiling `next/dynamic` targets (Recharts, FinancialMap)
+    // until they are actually requested, slashing first-visit compile time.
+    turbopackLazyDynamicImports: true,
+    turbopackLazyDynamicImportsSSR: true,
+  },
+  // Keep compiled dev pages/APIs resident longer so hopping between routes
+  // does not re-trigger a cold compile.
+  onDemandEntries: {
+    maxInactiveAge: 5 * 60 * 1000,
+    pagesBufferLength: 8,
+  },
   async headers() {
     return [
       {

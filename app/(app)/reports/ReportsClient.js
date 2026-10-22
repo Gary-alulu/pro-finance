@@ -5,11 +5,13 @@
 // CSV export streams the exact rows shown.
 
 import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import {
   BarChart3,
   Download,
   RefreshCw,
   AlertTriangle,
+  Wallet,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -17,6 +19,16 @@ import Tabs from "@/components/ui/Tabs";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import ErrorState from "@/components/ui/ErrorState";
+import { formatCurrency } from "@/lib/finance/currency";
+
+// Recharts is ~395 KB — keep the charts out of the initial reports bundle and
+// hydrate them only when the cash flow tab is opened.
+const CashFlowChart = dynamic(() => import("@/components/charts/CashFlowChart"), {
+  loading: () => <SkeletonLoader className="h-72 w-full rounded-lg" />,
+});
+const CashFlowCategoryChart = dynamic(() => import("@/components/charts/CashFlowCategoryChart"), {
+  loading: () => <SkeletonLoader className="h-72 w-full rounded-lg" />,
+});
 
 const ENTITIES = [
   { id: "assets", label: "Assets" },
@@ -25,6 +37,8 @@ const ENTITIES = [
   { id: "transactions", label: "Transactions" },
   { id: "documents", label: "Documents" },
 ];
+
+const CASHFLOW_TAB = { id: "cashflow", label: "Cash Flow", icon: Wallet };
 
 // Fields whose presence indicates "missing data" in a row
 const STATE_FIELDS = {
@@ -77,9 +91,15 @@ export default function ReportsClient({ user }) {
   const [fetchTick, setFetchTick] = useState(0);
   const [exporting, setExporting] = useState(false);
 
+  const isCashflow = activeTab === "cashflow";
+
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/reports/${activeTab}`)
+    // Cash flow is a time series, not an entity table — it has its own route.
+    const url = isCashflow
+      ? "/api/reports/cashflow?months=24"
+      : `/api/reports/${activeTab}`;
+    fetch(url)
       .then(async (res) => {
         if (!res.ok) throw new Error(`Failed to load ${activeTab} report`);
         return res.json();
@@ -93,7 +113,7 @@ export default function ReportsClient({ user }) {
     return () => {
       cancelled = true;
     };
-  }, [activeTab, fetchTick]);
+  }, [activeTab, fetchTick, isCashflow]);
 
   const entry = cache[activeTab];
   const loading = !entry;
@@ -122,7 +142,19 @@ export default function ReportsClient({ user }) {
   };
 
   const totalChips = useMemo(() => {
-    const totals = report?.totals;
+    if (!report) return [];
+
+    // Cash flow reports money rather than rows.
+    if (isCashflow) {
+      return [
+        { key: "income", label: "Income", value: report.income, tone: "positive" },
+        { key: "expenses", label: "Expenses", value: report.expenses, tone: "negative" },
+        { key: "net", label: "Net", value: report.net, tone: Number(report.net) < 0 ? "negative" : "positive" },
+        { key: "transfers", label: "Transfers", value: report.transfers, tone: "neutral" },
+      ];
+    }
+
+    const totals = report.totals;
     if (!totals) return [];
     return Object.entries(totals)
       .filter(([k]) => k !== "count")
@@ -134,7 +166,7 @@ export default function ReportsClient({ user }) {
         value: v,
         warn: k.startsWith("missing") || k.startsWith("unpriced") || k === "overdue" || k === "awaitingReview" || k === "duplicates",
       }));
-  }, [report]);
+  }, [report, isCashflow]);
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-screen-2xl mx-auto">
@@ -162,7 +194,10 @@ export default function ReportsClient({ user }) {
             icon={Download}
             onClick={handleExport}
             loading={exporting}
-            disabled={!report || report.rows.length === 0}
+            disabled={
+              !report ||
+              (isCashflow ? report.transactionCount === 0 : report.rows.length === 0)
+            }
           >
             Export CSV
           </Button>
@@ -171,10 +206,16 @@ export default function ReportsClient({ user }) {
 
       {/* ── Tabs ────────────────────────────────────────────────────────── */}
       <Tabs
-        tabs={ENTITIES.map((e) => ({
-          ...e,
-          count: report?.entity === e.id ? report.totals?.count : undefined,
-        }))}
+        tabs={[
+          ...ENTITIES.map((e) => ({
+            ...e,
+            count: report?.entity === e.id ? report.totals?.count : undefined,
+          })),
+          {
+            ...CASHFLOW_TAB,
+            count: isCashflow ? report?.transactionCount : undefined,
+          },
+        ]}
         activeTab={activeTab}
         onChange={setActiveTab}
       />
@@ -185,27 +226,75 @@ export default function ReportsClient({ user }) {
           <span className="text-[var(--color-text-tertiary)] font-medium uppercase tracking-wider">
             Totals:
           </span>
-          <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-secondary)]">
-            {totals.count} record{totals.count === 1 ? "" : "s"}
-          </span>
-          {totalChips.map((chip) => (
-            <span
-              key={chip.key}
-              className={`px-2.5 py-1 rounded-full ${
-                chip.warn && chip.value > 0
-                  ? "bg-[var(--color-coral-50)] text-[var(--color-coral-700)]"
-                  : "bg-[var(--color-surface-2)] text-[var(--color-text-secondary)]"
-              }`}
-            >
-              {chip.label}: {chip.value}
-              {chip.warn && chip.value > 0 && (
-                <AlertTriangle size={11} className="inline ml-1 -mt-0.5" />
-              )}
-            </span>
-          ))}
+          {isCashflow ? (
+            <>
+              <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-secondary)]">
+                {report.transactionCount} transaction
+                {report.transactionCount === 1 ? "" : "s"}
+              </span>
+              {totalChips.map((chip) => (
+                <span
+                  key={chip.key}
+                  className={`px-2.5 py-1 rounded-full ${
+                    chip.tone === "positive"
+                      ? "bg-[var(--color-emerald-50)] text-[var(--color-emerald-700)]"
+                      : chip.tone === "negative"
+                        ? "bg-[var(--color-coral-50)] text-[var(--color-coral-700)]"
+                        : "bg-[var(--color-surface-2)] text-[var(--color-text-secondary)]"
+                  }`}
+                >
+                  {chip.label}: {formatCurrency(chip.value, user?.preferredCurrency || "KES")}
+                </span>
+              ))}
+            </>
+          ) : (
+            <>
+              <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-2)] text-[var(--color-text-secondary)]">
+                {report.totals.count} record{report.totals.count === 1 ? "" : "s"}
+              </span>
+              {totalChips.map((chip) => (
+                <span
+                  key={chip.key}
+                  className={`px-2.5 py-1 rounded-full ${
+                    chip.warn && chip.value > 0
+                      ? "bg-[var(--color-coral-50)] text-[var(--color-coral-700)]"
+                      : "bg-[var(--color-surface-2)] text-[var(--color-text-secondary)]"
+                  }`}
+                >
+                  {chip.label}: {chip.value}
+                  {chip.warn && chip.value > 0 && (
+                    <AlertTriangle size={11} className="inline ml-1 -mt-0.5" />
+                  )}
+                </span>
+              ))}
+            </>
+          )}
         </div>
       )}
 
+      {/* ── Cash flow charts ───────────────────────────────────────────── */}
+      {isCashflow ? (
+        loading ? (
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+            <SkeletonLoader className="h-72 w-full rounded-[var(--radius-lg)]" />
+            <SkeletonLoader className="h-72 w-full rounded-[var(--radius-lg)]" />
+          </div>
+        ) : error ? (
+          <ErrorState title="Could not load cash flow" description={error} />
+        ) : (
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 items-stretch">
+            <CashFlowChart
+              currency={user?.preferredCurrency || "KES"}
+              monthly={report?.monthly}
+            />
+            <CashFlowCategoryChart
+              currency={user?.preferredCurrency || "KES"}
+              categories={report?.byCategoryDetail}
+            />
+          </div>
+        )
+      ) : (
+        <>
       {/* ── Table ──────────────────────────────────────────────────────── */}
       {loading ? (
         <div className="space-y-3">
@@ -258,11 +347,14 @@ export default function ReportsClient({ user }) {
           </div>
         </div>
       )}
+        </>
+      )}
 
       {report && (
         <p className="text-[11px] text-[var(--color-text-tertiary)]">
-          Generated {new Date(report.generatedAt).toLocaleString()} · CSV export applies
-          spreadsheet formula-injection guards.
+          {isCashflow
+            ? "Transfers are reported separately and are never counted as income or expenses · CSV export applies spreadsheet formula-injection guards."
+            : `Generated ${new Date(report.generatedAt).toLocaleString()} · CSV export applies spreadsheet formula-injection guards.`}
         </p>
       )}
     </div>

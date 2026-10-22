@@ -67,18 +67,16 @@ async function getHandler(request) {
   }
 
   const documents = await Document.find(filter)
+    .select("-storageKey -extractionResult.rawText")
     .sort({ uploadedAt: -1 })
     .limit(500)
     .lean();
 
   return NextResponse.json({
-    documents: documents.map((doc) => {
-      const { storageKey, ...safeDoc } = doc;
-      return {
-        ...safeDoc,
-        id: doc._id.toString(),
-      };
-    }),
+    documents: documents.map((doc) => ({
+      ...doc,
+      id: doc._id.toString(),
+    })),
   });
 }
 

@@ -50,11 +50,13 @@ function CustomTooltip({ active, payload, currency }) {
   );
 }
 
-export default function AssetAllocationChart({ currency = "KES" }) {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function AssetAllocationChart({ currency = "KES", initialData = null }) {
+  const [data, setData] = useState(initialData || []);
+  const [loading, setLoading] = useState(initialData === null);
 
   useEffect(() => {
+    if (initialData !== null) return;
+
     async function load() {
       try {
         const res = await fetch("/api/assets?summary=true");
@@ -68,7 +70,7 @@ export default function AssetAllocationChart({ currency = "KES" }) {
       }
     }
     load();
-  }, []);
+  }, [initialData]);
 
   const totalAmount = data.reduce((s, d) => s + parseFloat(d.amount || 0), 0);
   const chartData = data.map((d) => ({
@@ -81,10 +83,11 @@ export default function AssetAllocationChart({ currency = "KES" }) {
 
   return (
     <div
-      className="rounded-xl p-5"
+      className="p-5 h-full flex flex-col"
       style={{
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
+        borderRadius: "var(--radius-lg)",
         boxShadow: "var(--shadow-sm)",
       }}
     >
@@ -93,20 +96,22 @@ export default function AssetAllocationChart({ currency = "KES" }) {
       </h3>
 
       {loading ? (
-        <div className="space-y-3">
-          <SkeletonLoader className="h-36 w-36 rounded-full mx-auto" />
-          <SkeletonLoader className="h-3 w-28 rounded mx-auto" />
+        <div className="flex-1 flex flex-col items-center justify-center gap-3">
+          <SkeletonLoader className="h-36 w-36 rounded-full" />
+          <SkeletonLoader className="h-3 w-28 rounded" />
         </div>
       ) : chartData.length === 0 ? (
-        <EmptyState
-          icon={PieIcon}
-          title="No assets recorded"
-          description="Add assets to see allocation."
-          compact
-        />
+        <div className="flex-1 flex items-center justify-center">
+          <EmptyState
+            icon={PieIcon}
+            title="No assets recorded"
+            description="Add assets to see allocation."
+            compact
+          />
+        </div>
       ) : (
-        <div>
-          <div className="h-36">
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1" style={{ minHeight: "9rem" }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -129,7 +134,7 @@ export default function AssetAllocationChart({ currency = "KES" }) {
           </div>
 
           {/* Legend */}
-          <ul className="mt-3 space-y-1.5">
+          <ul className="mt-4 space-y-2">
             {chartData.slice(0, 5).map((d) => (
               <li key={d.category} className="flex items-center gap-2 text-xs">
                 <span

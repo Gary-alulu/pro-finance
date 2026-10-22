@@ -71,11 +71,11 @@ async function postHandler(request) {
 
   const [assets, liabilities, investments, transactions, documents, user] =
     await Promise.all([
-      Asset.find({ ownerId: userId }).lean(),
+      Asset.find({ ownerId: userId }).select("-valuationHistory").lean(),
       Liability.find({ ownerId: userId }).lean(),
-      InvestmentHolding.find({ ownerId: userId }).lean(),
+      InvestmentHolding.find({ ownerId: userId }).select("-priceHistory").lean(),
       Transaction.find({ ownerId: userId }).sort({ date: -1 }).limit(2000).lean(),
-      Document.find({ ownerId: userId }).lean(),
+      Document.find({ ownerId: userId }).select("-storageKey -extractionResult.rawText").lean(),
       User.findById(userId).lean(),
     ]);
 
@@ -86,85 +86,110 @@ async function postHandler(request) {
   let upserted = 0;
   let autoResolved = 0;
 
+  // Bulk-load existing items so the upsert never issues a query per finding.
+  const existingItems = await AccountabilityItem.find({ ownerId: userObjectId })
+    .select("key status")
+    .lean();
+  const existingByKey = new Map(existingItems.map((i) => [i.key, i]));
+
   // Upsert current findings; preserve resolved/dismissed state on existing rows.
+  const itemOps = [];
   for (const f of findings) {
-    const existing = await AccountabilityItem.findOne({
-      ownerId: userObjectId,
-      key: f.key,
-    });
+    const existing = existingByKey.get(f.key);
 
     if (existing) {
-      if (existing.status === "open") {
-        existing.severity = f.severity;
-        existing.title = f.title;
-        existing.reason = f.reason;
-        existing.actionLabel = f.actionLabel;
-        existing.actionHref = f.actionHref;
-        existing.meta = f.meta;
-        await existing.save();
-        upserted++;
-      }
       // resolved/dismissed rows stay untouched — the user already decided.
+      if (existing.status !== "open") continue;
+      itemOps.push({
+        updateOne: {
+          filter: { ownerId: userObjectId, key: f.key },
+          update: {
+            $set: {
+              severity: f.severity,
+              title: f.title,
+              reason: f.reason,
+              actionLabel: f.actionLabel,
+              actionHref: f.actionHref,
+              meta: f.meta,
+            },
+          },
+        },
+      });
+      upserted++;
       continue;
     }
 
-    await AccountabilityItem.create({
-      ownerId: userObjectId,
-      key: f.key,
-      type: f.type,
-      severity: f.severity,
-      title: f.title,
-      reason: f.reason,
-      actionLabel: f.actionLabel,
-      actionHref: f.actionHref,
-      linkedEntityType: f.entityType,
-      linkedEntityId: f.entityId
-        ? new mongoose.Types.ObjectId(f.entityId)
-        : undefined,
-      meta: f.meta,
-      status: "open",
+    itemOps.push({
+      insertOne: {
+        document: {
+          ownerId: userObjectId,
+          key: f.key,
+          type: f.type,
+          severity: f.severity,
+          title: f.title,
+          reason: f.reason,
+          actionLabel: f.actionLabel,
+          actionHref: f.actionHref,
+          linkedEntityType: f.entityType,
+          linkedEntityId: f.entityId
+            ? new mongoose.Types.ObjectId(f.entityId)
+            : undefined,
+          meta: f.meta,
+          status: "open",
+        },
+      },
     });
     upserted++;
   }
 
   // Auto-resolve open items whose finding no longer exists (fixed records).
-  const openItems = await AccountabilityItem.find({
-    ownerId: userObjectId,
-    status: "open",
-  });
-  for (const item of openItems) {
-    if (!findingKeys.has(item.key)) {
-      item.status = "resolved";
-      item.resolution = "auto";
-      item.resolvedAt = now;
-      await item.save();
-      autoResolved++;
-    }
+  const staleKeys = existingItems
+    .filter((i) => i.status === "open" && !findingKeys.has(i.key))
+    .map((i) => i.key);
+  if (staleKeys.length > 0) {
+    itemOps.push({
+      updateMany: {
+        filter: { ownerId: userObjectId, key: { $in: staleKeys }, status: "open" },
+        update: { $set: { status: "resolved", resolution: "auto", resolvedAt: now } },
+      },
+    });
+    autoResolved = staleKeys.length;
+  }
+
+  if (itemOps.length > 0) {
+    await AccountabilityItem.bulkWrite(itemOps, { ordered: false });
   }
 
   // Date-driven reminders, gated by the user's notification setting.
   let remindersCreated = 0;
   if (user?.settings?.notificationsEnabled !== false) {
     const suggestions = suggestReminders({ liabilities, assets, now });
-    for (const r of suggestions) {
-      const existing = await Reminder.findOne({
+    if (suggestions.length > 0) {
+      const existingReminders = await Reminder.find({
         ownerId: userObjectId,
-        key: r.key,
+        key: { $in: suggestions.map((r) => r.key) },
         status: { $in: ["open", "snoozed"] },
-      });
-      if (existing) continue;
-      await Reminder.create({
-        ownerId: userObjectId,
-        key: r.key,
-        title: r.title,
-        body: r.body,
-        dueAt: new Date(r.dueAt),
-        priority: r.priority,
-        entityType: r.entityType,
-        entityId: r.entityId ? new mongoose.Types.ObjectId(r.entityId) : undefined,
-        source: "auto",
-      });
-      remindersCreated++;
+      })
+        .select("key")
+        .lean();
+      const takenKeys = new Set(existingReminders.map((r) => r.key));
+      const reminderDocs = suggestions
+        .filter((r) => !takenKeys.has(r.key))
+        .map((r) => ({
+          ownerId: userObjectId,
+          key: r.key,
+          title: r.title,
+          body: r.body,
+          dueAt: new Date(r.dueAt),
+          priority: r.priority,
+          entityType: r.entityType,
+          entityId: r.entityId ? new mongoose.Types.ObjectId(r.entityId) : undefined,
+          source: "auto",
+        }));
+      if (reminderDocs.length > 0) {
+        await Reminder.insertMany(reminderDocs, { ordered: false });
+        remindersCreated = reminderDocs.length;
+      }
     }
   }
 
