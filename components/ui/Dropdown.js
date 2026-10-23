@@ -71,11 +71,11 @@ export default function Dropdown({
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -4, scale: 0.98 }}
-            animate={{ opacity: 1, y: 4, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.98 }}
-            transition={{ duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute left-0 top-full z-50 min-w-full w-max max-h-64 overflow-auto rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl py-1.5"
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 6, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
+            className="absolute left-0 top-full z-[60] min-w-[calc(100%+0.5rem)] w-max max-h-72 overflow-y-auto overflow-x-hidden rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[0_32px_80px_-32px_rgba(0,0,0,0.7)] ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-md py-1.5"
           >
             {options.map((opt) => {
               const isSelected = opt.value === value;
@@ -87,13 +87,13 @@ export default function Dropdown({
                     onChange(opt.value);
                     setOpen(false);
                   }}
-                  className={`w-full flex items-center gap-2 px-3 py-1.5 text-left transition-colors ${
+                  className={`group w-full flex items-center gap-2 px-2.5 mx-1.5 my-0.5 rounded-[var(--radius-md)] text-left transition-colors duration-150 ${
                     isSelected
                       ? "bg-[var(--color-emerald-50)] text-[var(--color-emerald-700)]"
                       : "text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)]"
                   }`}
                 >
-                  <span className="flex-1 text-xs">{opt.label}</span>
+                  <span className="flex-1 text-xs py-1.5">{opt.label}</span>
                   {isSelected && <Check className="w-3.5 h-3.5" />}
                 </button>
               );

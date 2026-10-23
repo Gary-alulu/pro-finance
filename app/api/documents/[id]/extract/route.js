@@ -9,6 +9,7 @@ import Document from "@/lib/db/models/Document";
 import DocumentExtraction from "@/lib/db/models/DocumentExtraction";
 import { requireUserId, assertOwnership, withErrorHandling } from "@/lib/auth/session";
 import { extractDocumentData } from "@/lib/ai/extractor";
+import { buildReconciliationSuggestions } from "@/lib/reconciliation/service";
 import { getFile } from "@/lib/storage/storage";
 import { logAudit, requestMeta } from "@/lib/audit/logAudit";
 import mongoose from "mongoose";
@@ -74,6 +75,15 @@ async function postHandler(request, { params }) {
   await extractionRecord.save();
   await doc.save();
 
+  let reconciliation = null;
+  if (extraction) {
+    try {
+      reconciliation = await buildReconciliationSuggestions({ userId, doc });
+    } catch (err) {
+      console.warn("Reconciliation suggestion generation failed:", err.message);
+    }
+  }
+
   await logAudit(
     userId,
     "update",
@@ -95,6 +105,7 @@ async function postHandler(request, { params }) {
       errorMessage: extractionRecord.errorMessage,
     },
     document: doc.toJSON(),
+    reconciliation,
   });
 }
 

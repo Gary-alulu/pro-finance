@@ -169,24 +169,18 @@ export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
           <AnimatePresence>
             {quickCreateOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 4, scale: 0.97 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-52 rounded-xl overflow-hidden"
-                style={{
-                  background: "var(--color-surface)",
-                  border: "1px solid var(--color-border)",
-                  boxShadow: "var(--shadow-lg)",
-                  zIndex: "var(--z-modal)",
-                }}
+                initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 6, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
+                className="absolute right-0 top-full mt-1 w-56 rounded-[var(--radius-xl)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[0_32px_80px_-32px_rgba(0,0,0,0.7)] ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-md z-[var(--z-modal)]"
               >
                 <div className="py-1.5">
                   {QUICK_CREATE_ITEMS.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm transition-colors hover:bg-[var(--color-surface-2)]"
+                      className="group flex items-center gap-2.5 px-2.5 mx-1.5 py-1.5 my-0.5 rounded-[var(--radius-md)] text-sm transition-colors duration-150 hover:bg-[var(--color-surface-2)]"
                       style={{ color: "var(--color-text-primary)" }}
                     >
                       <item.icon size={15} style={{ color: "var(--color-text-tertiary)" }} />
@@ -246,21 +240,15 @@ export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
           <AnimatePresence>
             {profileOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 4, scale: 0.97 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-56 rounded-xl overflow-hidden"
-                style={{
-                  background: "var(--color-surface)",
-                  border: "1px solid var(--color-border)",
-                  boxShadow: "var(--shadow-lg)",
-                  zIndex: "var(--z-modal)",
-                }}
+                initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 6, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
+                className="absolute right-0 top-full mt-1 w-56 rounded-[var(--radius-xl)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[0_32px_80px_-32px_rgba(0,0,0,0.7)] ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-md z-[var(--z-modal)]"
               >
                 {/* User info */}
                 <div
-                  className="px-4 py-3"
+                  className="px-3.5 py-3"
                   style={{ borderBottom: "1px solid var(--color-border)" }}
                 >
                   <p className="text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>
@@ -280,7 +268,7 @@ export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
                 <div className="py-1.5">
                   <Link
                     href="/settings"
-                    className="flex items-center gap-2.5 px-4 py-2 text-sm transition-colors"
+                    className="group flex items-center gap-2.5 px-2.5 mx-1.5 py-1.5 my-0.5 rounded-[var(--radius-md)] text-sm transition-colors duration-150 hover:bg-[var(--color-surface-2)]"
                     style={{ color: "var(--color-text-primary)" }}
                   >
                     <Settings size={15} style={{ color: "var(--color-text-tertiary)" }} />
@@ -288,7 +276,7 @@ export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-2.5 mx-1.5 py-1.5 my-0.5 rounded-[var(--radius-md)] text-sm transition-colors duration-150 hover:bg-[var(--color-surface-2)] text-left"
                     style={{ color: "var(--color-text-primary)" }}
                   >
                     <LogOut size={15} style={{ color: "var(--color-text-tertiary)" }} />

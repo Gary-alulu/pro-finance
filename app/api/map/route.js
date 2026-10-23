@@ -9,6 +9,7 @@ import InvestmentHolding from "@/lib/db/models/InvestmentHolding";
 import Document from "@/lib/db/models/Document";
 import Transaction from "@/lib/db/models/Transaction";
 import RecordRelationship from "@/lib/db/models/RecordRelationship";
+import RelationshipSuggestion from "@/lib/db/models/RelationshipSuggestion";
 import { requireUserId, withErrorHandling } from "@/lib/auth/session";
 import Decimal from "decimal.js";
 
@@ -16,7 +17,7 @@ async function getHandler() {
   const userId = await requireUserId();
   await connectDB();
 
-  const [assets, liabilities, investments, documents, transactions, relationships] =
+  const [assets, liabilities, investments, documents, transactions, relationships, suggestions] =
     await Promise.all([
       Asset.find({ ownerId: userId, status: "active" }).select("-valuationHistory").lean(),
       Liability.find({ ownerId: userId, status: "active" }).lean(),
@@ -24,6 +25,7 @@ async function getHandler() {
       Document.find({ ownerId: userId }).select("-storageKey -extractionResult.rawText").sort({ uploadedAt: -1 }).limit(30).lean(),
       Transaction.find({ ownerId: userId }).sort({ date: -1 }).limit(20).lean(),
       RecordRelationship.find({ ownerId: userId }).lean(),
+      RelationshipSuggestion.find({ ownerId: userId, status: "suggested" }).sort({ confidence: -1 }).limit(50).lean(),
     ]);
 
   const nodes = [];
@@ -250,7 +252,30 @@ async function getHandler() {
     });
   });
 
-  return NextResponse.json({ nodes, edges });
+  // 7. AI relationship suggestions — dashed, dashed label, never confirmed
+  suggestions.forEach((sug) => {
+    const sourceNode = `${sug.source.kind}-${sug.source.refId.toString()}`;
+    const targetNode = `${sug.target.kind}-${sug.target.refId.toString()}`;
+    if (!nodes.some((n) => n.id === sourceNode) || !nodes.some((n) => n.id === targetNode)) return;
+    edges.push({
+      id: `edge-suggestion-${sug._id.toString()}`,
+      source: sourceNode,
+      target: targetNode,
+      type: "smoothstep",
+      label: `possible ${sug.type.replace(/_/g, " ")}`,
+      style: { stroke: "#c49a24", strokeWidth: 1.4, strokeDasharray: "6 4", opacity: 0.8 },
+      kind: "ai_suggestion",
+      confidence: "ai_suggested",
+      explanation: sug.explanation,
+      suggestionId: sug._id.toString(),
+    });
+  });
+
+  return NextResponse.json({
+    nodes,
+    edges,
+    suggestions: suggestions.map((s) => ({ ...s, id: s._id.toString() })),
+  });
 }
 
 export const GET = withErrorHandling(getHandler);

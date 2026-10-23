@@ -51,7 +51,11 @@ Open http://localhost:3000 and register the **first (and only) user**. Registrat
 | `MONGODB_URI` | MongoDB connection string (e.g. `mongodb://127.0.0.1:27017/profinance`) |
 | `NEXTAUTH_URL` | Canonical URL of the app (e.g. `http://localhost:3000`) |
 | `NEXTAUTH_SECRET` | JWT/session encryption secret — generate with `openssl rand -base64 48` and keep server-side |
-| `AI_PROVIDER` | Document extraction provider (currently `gemini`) |
+| `AI_PROVIDER` | Document extraction provider: `gemini` or `openai` |
+| `GEMINI_API_KEY` | Gemini API key (enables multimodal PDF/image extraction) |
+| `GEMINI_MODEL` | Gemini model, default `gemini-2.0-flash` |
+| `OPENAI_API_KEY` | OpenAI API key (alternative multimodal provider) |
+| `OPENAI_MODEL` | OpenAI model, default `gpt-4.1-mini` |
 
 ### Scripts
 
