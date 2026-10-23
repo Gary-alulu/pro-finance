@@ -31,6 +31,7 @@ import { formatCurrency, sumAmounts, calculateNetWorth } from "@/lib/finance/cur
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import Dropdown from "@/components/ui/Dropdown";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import Tabs from "@/components/ui/Tabs";
@@ -551,24 +552,23 @@ export default function AssetsClient({ user, initialTab = "assets", focusId = nu
             />
           </div>
 
-          <select
+          <Dropdown
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] focus:outline-none cursor-pointer"
-          >
-            <option value="all">All Categories</option>
-            {activeTab === "assets"
-              ? Object.entries(assetCategoryLabels).map(([key, item]) => (
-                  <option key={key} value={key}>
-                    {item.label}
-                  </option>
-                ))
-              : Object.entries(liabilityCategoryLabels).map(([key, item]) => (
-                  <option key={key} value={key}>
-                    {item.label}
-                  </option>
-                ))}
-          </select>
+            onChange={setSelectedCategory}
+            options={
+              activeTab === "assets"
+                ? [
+                    { value: "all", label: "All Categories" },
+                    ...Object.entries(assetCategoryLabels).map(([key, item]) => ({ value: key, label: item.label })),
+                  ]
+                : [
+                    { value: "all", label: "All Categories" },
+                    ...Object.entries(liabilityCategoryLabels).map(([key, item]) => ({ value: key, label: item.label })),
+                  ]
+            }
+            size="sm"
+            variant="default"
+          />
         </div>
       </div>
 

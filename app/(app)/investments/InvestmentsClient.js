@@ -27,6 +27,7 @@ import { Decimal } from "decimal.js";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import Dropdown from "@/components/ui/Dropdown";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import EmptyState from "@/components/ui/EmptyState";
@@ -417,18 +418,15 @@ export default function InvestmentsClient({ user, focusId = null, newRecord = fa
             />
           </div>
 
-          <select
+          <Dropdown
             value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] focus:outline-none cursor-pointer"
-          >
-            <option value="all">All Asset Classes</option>
-            {Object.entries(investmentTypeLabels).map(([key, val]) => (
-              <option key={key} value={key}>
-                {val.label}
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedType}
+            options={[
+              { value: "all", label: "All Asset Classes" },
+              ...Object.entries(investmentTypeLabels).map(([key, val]) => ({ value: key, label: val.label })),
+            ]}
+            size="sm"
+          />
         </div>
 
         <span className="text-xs text-[var(--color-text-tertiary)] font-medium">

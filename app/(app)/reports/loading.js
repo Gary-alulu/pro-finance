@@ -1,0 +1,6 @@
+// app/(app)/reports/loading.js
+import PageSkeleton from "@/components/ui/PageSkeleton";
+
+export default function Loading() {
+  return <PageSkeleton cards={4} rows={10} />;
+}

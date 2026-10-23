@@ -29,6 +29,7 @@ import { formatCurrency, sumAmounts } from "@/lib/finance/currency";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import Dropdown from "@/components/ui/Dropdown";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import EmptyState from "@/components/ui/EmptyState";
@@ -384,40 +385,39 @@ export default function TransactionsClient({ user, focusId = null, newRecord = f
             />
           </div>
 
-          <select
+          <Dropdown
             value={selectedDirection}
-            onChange={(e) => setSelectedDirection(e.target.value)}
-            className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] focus:outline-none cursor-pointer"
-          >
-            <option value="all">All Directions</option>
-            <option value="inflow">Inflow (+)</option>
-            <option value="outflow">Outflow (-)</option>
-            <option value="transfer">Transfer</option>
-          </select>
+            onChange={setSelectedDirection}
+            options={[
+              { value: "all", label: "All Directions" },
+              { value: "inflow", label: "Inflow (+)" },
+              { value: "outflow", label: "Outflow (-)" },
+              { value: "transfer", label: "Transfer" },
+            ]}
+            size="sm"
+          />
 
-          <select
+          <Dropdown
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] focus:outline-none cursor-pointer"
-          >
-            <option value="all">All Categories</option>
-            {Object.entries(categoryLabels).map(([key, val]) => (
-              <option key={key} value={key}>
-                {val.label}
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedCategory}
+            options={[
+              { value: "all", label: "All Categories" },
+              ...Object.entries(categoryLabels).map(([key, val]) => ({ value: key, label: val.label })),
+            ]}
+            size="sm"
+          />
 
-          <select
+          <Dropdown
             value={selectedEvidence}
-            onChange={(e) => setSelectedEvidence(e.target.value)}
-            className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] focus:outline-none cursor-pointer"
-          >
-            <option value="all">All Evidence Statuses</option>
-            <option value="supported">Supported (Verified)</option>
-            <option value="missing">Missing Evidence</option>
-            <option value="pending_review">Pending Review</option>
-          </select>
+            onChange={setSelectedEvidence}
+            options={[
+              { value: "all", label: "All Evidence" },
+              { value: "supported", label: "Supported" },
+              { value: "missing", label: "Missing" },
+              { value: "pending_review", label: "Pending Review" },
+            ]}
+            size="sm"
+          />
         </div>
 
         <div className="text-xs text-[var(--color-text-tertiary)] font-medium">

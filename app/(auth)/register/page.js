@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { registerSchema } from "@/lib/validations/schemas";
 import { SUPPORTED_CURRENCIES } from "@/lib/finance/currency";
 import { Field, PasswordInput, ErrorBanner, SubmitButton, noPaste } from "@/components/auth/AuthUI";
+import Dropdown from "@/components/ui/Dropdown";
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -186,17 +187,15 @@ export default function RegisterPage() {
           label="Preferred reporting currency"
           icon={Coins}
         >
-          <select
-            id="reg-currency"
-            className="auth-input auth-select"
-            {...register("preferredCurrency")}
-          >
-            {SUPPORTED_CURRENCIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.code} — {c.name}
-              </option>
-            ))}
-          </select>
+          <Dropdown
+            value={undefined}
+            onChange={() => {}}
+            options={SUPPORTED_CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} — ${c.name}` }))}
+            placeholder="KES — Kenyan Shilling"
+            size="md"
+            variant="default"
+            className="w-full"
+          />
         </Field>
 
         <div className="pt-1">

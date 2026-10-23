@@ -22,6 +22,7 @@ import {
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Tabs from "@/components/ui/Tabs";
+import Dropdown from "@/components/ui/Dropdown";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
 import ErrorState from "@/components/ui/ErrorState";
@@ -297,16 +298,18 @@ export default function AccountabilityClient({ user }) {
           activeTab={activeTab}
           onChange={setActiveTab}
         />
-        <select
+        <Dropdown
           value={selectedSeverity}
-          onChange={(e) => setSelectedSeverity(e.target.value)}
-          className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] focus:outline-none cursor-pointer"
-        >
-          <option value="all">All Severities</option>
-          <option value="error">Errors</option>
-          <option value="warning">Warnings</option>
-          <option value="info">Info</option>
-        </select>
+          onChange={setSelectedSeverity}
+          options={[
+            { value: "all", label: "All Severities" },
+            { value: "error", label: "Errors" },
+            { value: "warning", label: "Warnings" },
+            { value: "info", label: "Info" },
+          ]}
+          size="sm"
+          variant="default"
+        />
       </div>
 
       {/* ── Findings ────────────────────────────────────────────────────── */}

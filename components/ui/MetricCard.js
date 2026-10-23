@@ -2,7 +2,8 @@
 // components/ui/MetricCard.js
 // KPI widget for displaying a single financial metric.
 
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useState } from "react";
+import { TrendingUp, TrendingDown, Minus, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import SkeletonLoader from "./SkeletonLoader";
 
@@ -17,13 +18,14 @@ export default function MetricCard({
   loading = false,
   href,         // optional — wraps the card in a link to a filtered view
 }) {
+  const [hideValues, setHideValues] = useState(false);
   const positiveChange = change?.startsWith("+");
   const negativeChange = change?.startsWith("-");
 
   const card = (
     <div
       id={id}
-      className="p-5 h-full flex flex-col"
+      className="p-5 h-full flex flex-col group relative"
       style={{
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
@@ -31,9 +33,23 @@ export default function MetricCard({
         boxShadow: "var(--shadow-sm)",
       }}
     >
-      <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{ color: "var(--color-text-tertiary)" }}>
-        {label}
-      </p>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--color-text-tertiary)" }}>
+          {label}
+        </p>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setHideValues((v) => !v);
+          }}
+          className="p-1 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+          style={{ color: "var(--color-text-tertiary)", background: "var(--color-surface-2)" }}
+          aria-label={hideValues ? "Show value" : "Hide value"}
+        >
+          {hideValues ? <Eye size={12} /> : <EyeOff size={12} />}
+        </button>
+      </div>
 
       {loading ? (
         <div className="space-y-2">
@@ -43,7 +59,7 @@ export default function MetricCard({
       ) : (
         <>
           <p
-            className="metric-value text-2xl font-semibold"
+            className={`metric-value text-2xl font-semibold transition-all duration-200 ${hideValues ? "blur-sm select-none" : ""}`}
             style={{
               color: positive === true
                 ? "var(--color-positive)"
@@ -57,7 +73,7 @@ export default function MetricCard({
           </p>
 
           {subValue && (
-            <p className="text-xs mt-1.5" style={{ color: "var(--color-text-tertiary)" }}>
+            <p className={`text-xs mt-1.5 transition-all duration-200 ${hideValues ? "blur-sm select-none" : ""}`} style={{ color: "var(--color-text-tertiary)" }}>
               {subValue}
             </p>
           )}

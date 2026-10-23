@@ -95,7 +95,6 @@ export default function OverviewClient({
   const hasData = netWorth !== null;
 
   function masked(value, formatted) {
-    if (hideValues) return "••••••";
     return formatted;
   }
 
@@ -141,7 +140,7 @@ export default function OverviewClient({
             ) : (
               <div className="mt-3 mb-4">
                 <span
-                  className="metric-value font-semibold"
+                  className={`metric-value font-semibold transition-all duration-200 ${hideValues ? "blur-sm select-none" : ""}`}
                   style={{
                     fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
                     color: "#faf9f6",
@@ -159,13 +158,13 @@ export default function OverviewClient({
               <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                 <span>
                   Assets:{" "}
-                  <strong style={{ color: "var(--color-emerald-400)" }}>
+                  <strong className={`transition-all duration-200 ${hideValues ? "blur-sm select-none" : ""}`} style={{ color: "var(--color-emerald-400)" }}>
                     {masked(totalAssets, formatCurrency(totalAssets, currency))}
                   </strong>
                 </span>
                 <span>
                   Liabilities:{" "}
-                  <strong style={{ color: "var(--color-coral-300)" }}>
+                  <strong className={`transition-all duration-200 ${hideValues ? "blur-sm select-none" : ""}`} style={{ color: "var(--color-coral-300)" }}>
                     {masked(totalLiabilities, formatCurrency(totalLiabilities, currency))}
                   </strong>
                 </span>

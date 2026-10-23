@@ -15,11 +15,28 @@ export const Select = forwardRef(function Select(
     containerClassName = "",
     id,
     children,
+    size = "md",
+    variant = "default",
     ...props
   },
   ref
 ) {
   const selectId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
+
+  const sizeClasses = {
+    sm: "px-2.5 py-1.5 text-xs pr-7",
+    md: "px-3 py-2 text-sm pr-8",
+    lg: "px-4 py-2.5 text-sm pr-9",
+  };
+
+  const variantClasses = {
+    default: error
+      ? "border-[var(--color-coral-500)] focus:border-[var(--color-coral-500)] focus:ring-2 focus:ring-[var(--color-coral-100)]"
+      : "border-[var(--color-border)] focus:border-[var(--color-emerald-500)] focus:ring-2 focus:ring-[var(--color-emerald-100)]",
+    subtle: error
+      ? "border-[var(--color-coral-500)] bg-[var(--color-surface-2)]"
+      : "border-[var(--color-border)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] focus:border-[var(--color-emerald-500)] focus:bg-[var(--color-surface)] focus:ring-2 focus:ring-[var(--color-emerald-100)]",
+  };
 
   return (
     <div className={`flex flex-col gap-1.5 ${containerClassName}`}>
@@ -32,17 +49,11 @@ export const Select = forwardRef(function Select(
         </label>
       )}
 
-      <div
-        className={`relative flex items-center rounded-[var(--radius-md)] border bg-[var(--color-surface)] transition-all ${
-          error
-            ? "border-[var(--color-coral-500)] focus-within:ring-2 focus-within:ring-[var(--color-coral-100)]"
-            : "border-[var(--color-border)] focus-within:border-[var(--color-emerald-500)] focus-within:ring-2 focus-within:ring-[var(--color-emerald-100)]"
-        }`}
-      >
+      <div className="relative flex items-center">
         <select
           ref={ref}
           id={selectId}
-          className={`w-full appearance-none bg-transparent px-3 py-2 pr-8 text-sm text-[var(--color-text-primary)] focus:outline-none disabled:bg-[var(--color-surface-2)] disabled:text-[var(--color-text-tertiary)] cursor-pointer ${className}`}
+          className={`w-full appearance-none rounded-[var(--radius-md)] border bg-[var(--color-surface)] text-[var(--color-text-primary)] transition-all duration-150 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-xs ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
           {...props}
         >
           {children
