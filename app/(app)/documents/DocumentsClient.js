@@ -23,6 +23,11 @@ import {
   FileSpreadsheet,
   FileCheck,
   ExternalLink,
+  FileSearch,
+  Plus,
+  X,
+  GitCompare,
+  ScrollText,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/finance/currency";
 import Button from "@/components/ui/Button";
@@ -33,6 +38,55 @@ import Modal from "@/components/ui/Modal";
 import Tabs from "@/components/ui/Tabs";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
+
+const DOCUMENT_TYPE_LABELS = {
+  bank_statement: "Bank Statement",
+  property_deed: "Title Deed",
+  share_certificate: "Share Certificate",
+  loan_agreement: "Loan Agreement",
+  tax_return: "Tax Return",
+  insurance_policy: "Insurance Policy",
+  valuation_report: "Valuation Report",
+  investment_statement: "Investment Statement",
+  dividend_statement: "Dividend Statement",
+  nse_contract_note: "NSE Contract Note",
+  receipt: "Receipt",
+  invoice: "Invoice",
+  contract: "Contract",
+  identity_document: "Identity Document",
+  other: "Other",
+};
+
+const FIELD_LABELS = {
+  name: "Record name",
+  date: "Document date",
+  totalAmount: "Total amount",
+  amount: "Total amount",
+  subtotal: "Subtotal",
+  taxAmount: "Tax",
+  feesAmount: "Fees",
+  currency: "Currency",
+  counterparty: "Counterparty",
+  category: "Category",
+  lineItems: "Transaction details",
+  "lineItems.amount": "Line item amounts",
+  accountNumber: "Account number",
+  closingBalance: "Closing balance",
+  reference: "Reference",
+};
+
+function fieldLabel(field) {
+  if (!field) return "Field";
+  if (FIELD_LABELS[field]) return FIELD_LABELS[field];
+  return String(field)
+    .replace(/[._]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function safeCurrency(value, fallback = "KES") {
+  if (!value) return fallback;
+  return /^[A-Z]{3}$/.test(value) ? value : fallback;
+}
 
 export default function DocumentsClient({ user, focusId = null, newRecord = false }) {
   const [documents, setDocuments] = useState([]);
@@ -60,10 +114,12 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
     category: "",
     counterparty: "",
     description: "",
+    lineItems: [],
   });
   const [approving, setApproving] = useState(false);
   const [reviewError, setReviewError] = useState("");
   const [successBanner, setSuccessBanner] = useState("");
+  const [retryingId, setRetryingId] = useState(null);
 
   // Delete state
   const [docToDelete, setDocToDelete] = useState(null);
@@ -102,6 +158,17 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
 
     return { awaiting, approved, total };
   }, [documents]);
+
+  const reviewProposal = reviewingDoc?.extractionResult?.proposedFields || {};
+  const reviewConflicts = reviewProposal.conflicts || [];
+  const reviewMissing = reviewProposal.missingFields || [];
+  const reviewAmbiguous = reviewProposal.ambiguousFields || [];
+  const reviewEvidence = reviewProposal.fieldEvidence || [];
+  const reviewComputed = reviewProposal.computed || {};
+  const reviewConfidence =
+    reviewingDoc?.extractionResult?.confidence ??
+    reviewProposal.confidence ??
+    null;
 
   // Filtered documents
   const filtered = useMemo(() => {
@@ -153,6 +220,7 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
 
       setIsUploadOpen(false);
       setUploadFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       setUploadNotes("");
       setSuccessBanner("Document uploaded! AI extraction completed and awaiting your review.");
       setTimeout(() => setSuccessBanner(""), 6000);
@@ -168,16 +236,31 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
   const openReviewStudio = (doc) => {
     setReviewingDoc(doc);
     const prop = doc.extractionResult?.proposedFields || {};
+    const lineItems = (prop.lineItems || []).map((item) => ({
+      date: item.date || prop.date || new Date().toISOString().split("T")[0],
+      description: item.description || "",
+      amount: item.amount || "",
+      currency: item.currency || prop.currency || user?.preferredCurrency || "KES",
+      direction: item.direction || "unknown",
+      category: item.category || "",
+      reference: item.reference || "",
+    }));
 
     setReviewForm({
-      entityType: prop.proposedEntityType || "asset",
+      entityType:
+        prop.proposedEntityType && prop.proposedEntityType !== "none"
+          ? prop.proposedEntityType
+          : lineItems.length > 0
+          ? "transaction"
+          : "asset",
       name: prop.name || doc.filename.replace(/\.[^/.]+$/, ""),
-      amount: prop.amount || "0.00",
+      amount: prop.totalAmount || prop.amount || (lineItems.length === 0 ? "" : ""),
       currency: prop.currency || user?.preferredCurrency || "KES",
       date: prop.date || new Date().toISOString().split("T")[0],
-      category: prop.category || "property",
+      category: prop.category || "",
       counterparty: prop.counterparty || "",
       description: prop.summary || "",
+      lineItems,
     });
     setReviewError("");
   };
@@ -185,16 +268,51 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
   // Handle Approve & Commit
   const handleApprove = async () => {
     if (!reviewingDoc) return;
+
+    const lineItems =
+      reviewForm.entityType === "transaction"
+        ? (reviewForm.lineItems || []).filter(
+            (item) => item.amount || item.description || item.reference
+          )
+        : [];
+
+    if (reviewForm.entityType === "transaction" && lineItems.length > 0) {
+      const missingAmount = lineItems.find((item) => !item.amount);
+      if (missingAmount) {
+        setReviewError("Every transaction line needs an amount before it can be approved.");
+        return;
+      }
+    } else if (!reviewForm.amount) {
+      setReviewError("Enter the amount you want to commit to your records.");
+      return;
+    }
+
     setApproving(true);
     setReviewError("");
 
     try {
+      const submittedLineItems = lineItems.map((item) => ({
+        date: item.date || reviewForm.date,
+        description: item.description || reviewForm.name,
+        amount: item.amount,
+        currency: item.currency || reviewForm.currency,
+        direction: item.direction || "unknown",
+        category: item.category || undefined,
+        reference: item.reference || undefined,
+      }));
+
       const res = await fetch(`/api/documents/${reviewingDoc.id}/approve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           entityType: reviewForm.entityType,
-          data: reviewForm,
+          data: {
+            ...reviewForm,
+            lineItems:
+              reviewForm.entityType === "transaction" && submittedLineItems.length > 0
+                ? submittedLineItems
+                : undefined,
+          },
         }),
       });
 
@@ -203,9 +321,13 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
         throw new Error(err.error || "Failed to approve document extraction");
       }
 
+      const result = await res.json();
+      const approvedCount = result.createdEntity?.count || 1;
       setReviewingDoc(null);
       setSuccessBanner(
-        `Record approved and committed as official ${reviewForm.entityType}! Linked to document.`
+        approvedCount > 1
+          ? `${approvedCount} official transactions approved and linked to the source document.`
+          : `Record approved and committed as official ${reviewForm.entityType}! Linked to document.`
       );
       setTimeout(() => setSuccessBanner(""), 6000);
       fetchData();
@@ -213,6 +335,25 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
       setReviewError(err.message);
     } finally {
       setApproving(false);
+    }
+  };
+
+  const handleRetryExtraction = async (doc) => {
+    setRetryingId(doc.id);
+    setSuccessBanner("");
+    try {
+      const res = await fetch(`/api/documents/${doc.id}/extract`, { method: "POST" });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to re-run extraction");
+      }
+      await fetchData();
+      setSuccessBanner(`Extraction re-run for "${doc.filename}". Review the updated proposal.`);
+      setTimeout(() => setSuccessBanner(""), 6000);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setRetryingId(null);
     }
   };
 
@@ -264,6 +405,7 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
             setUploadFile(null);
             setUploadNotes("");
             setUploadError("");
+            if (fileInputRef.current) fileInputRef.current.value = "";
             setIsUploadOpen(true);
           }}
         >
@@ -392,9 +534,14 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
           {filtered.map((doc) => {
             const isAwaiting = doc.processingStatus === "awaiting_review";
             const prop = doc.extractionResult?.proposedFields;
-            const confidence = doc.extractionResult?.confidence
-              ? Math.round(doc.extractionResult.confidence * 100)
-              : 85;
+            const rawConfidence = doc.extractionResult?.confidence ?? prop?.confidence;
+            const confidence =
+              rawConfidence === null || rawConfidence === undefined
+                ? null
+                : Math.round(rawConfidence * 100);
+            const missingCount = prop?.missingFields?.length || 0;
+            const conflictCount = prop?.conflicts?.length || 0;
+            const lineItemCount = prop?.computed?.lineItemCount || prop?.lineItems?.length || 0;
 
             return (
               <div
@@ -433,11 +580,21 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
                     </div>
 
                     <Badge
-                      tone={isAwaiting ? "gold" : "emerald"}
+                      tone={
+                        isAwaiting
+                          ? "gold"
+                          : doc.processingStatus === "extraction_failed"
+                          ? "coral"
+                          : "emerald"
+                      }
                       dot
                       size="sm"
                     >
-                      {isAwaiting ? "Awaiting Review" : "Approved"}
+                      {isAwaiting
+                        ? "Awaiting Review"
+                        : doc.processingStatus === "extraction_failed"
+                        ? "Extraction Failed"
+                        : "Approved"}
                     </Badge>
                   </div>
 
@@ -446,20 +603,47 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
                     <div className="mt-4 p-3 rounded-[var(--radius-md)] bg-[var(--color-surface)] border border-[var(--color-border)]">
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
-                          AI Proposal ({confidence}%)
+                          AI Proposal
+                          {confidence === null ? "" : ` (${confidence}%)`}
                         </span>
                         <span className="capitalize font-medium text-[var(--color-emerald-700)]">
                           {prop.proposedEntityType || "Record"}
                         </span>
                       </div>
 
+                      <div className="mt-1 flex items-center gap-1.5 text-[11px] text-[var(--color-text-tertiary)]">
+                        <FileSearch className="w-3 h-3" />
+                        {DOCUMENT_TYPE_LABELS[doc.documentType || prop.documentType] || "Other"}
+                        {lineItemCount > 0 && <span>• {lineItemCount} line items</span>}
+                        {prop.source?.pageCount && <span>• {prop.source.pageCount} pages</span>}
+                      </div>
+
                       <div className="mt-1 text-sm font-bold text-[var(--color-text-primary)] line-clamp-1">
-                        {prop.name}
+                        {prop.name || doc.filename}
                       </div>
 
                       <div className="mt-1 text-base font-bold text-[var(--color-text-primary)]">
-                        {formatCurrency(prop.amount, prop.currency || "KES")}
+                        {prop.totalAmount || prop.amount
+                          ? formatCurrency(prop.totalAmount || prop.amount, safeCurrency(prop.currency))
+                          : "Amount not found"}
                       </div>
+
+                      {(conflictCount > 0 || missingCount > 0) && (
+                        <div className="mt-2 space-y-1">
+                          {conflictCount > 0 && (
+                            <p className="text-[11px] font-medium text-[var(--color-negative)] flex items-center gap-1">
+                              <GitCompare className="w-3 h-3" />
+                              {conflictCount} conflicting value{conflictCount === 1 ? "" : "s"}
+                            </p>
+                          )}
+                          {missingCount > 0 && (
+                            <p className="text-[11px] font-medium text-[var(--color-gold-700)] flex items-center gap-1">
+                              <AlertTriangle className="w-3 h-3" />
+                              {missingCount} missing information flag{missingCount === 1 ? "" : "s"}
+                            </p>
+                          )}
+                        </div>
+                      )}
 
                       {prop.summary && (
                         <p className="mt-1 text-[11px] text-[var(--color-text-secondary)] line-clamp-2">
@@ -480,6 +664,16 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
                       onClick={() => openReviewStudio(doc)}
                     >
                       Review & Approve
+                    </Button>
+                  ) : doc.processingStatus === "extraction_failed" ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={FileSearch}
+                      loading={retryingId === doc.id}
+                      onClick={() => handleRetryExtraction(doc)}
+                    >
+                      Retry Extraction
                     </Button>
                   ) : (
                     <span className="text-[11px] font-semibold text-[var(--color-emerald-700)] flex items-center gap-1">
@@ -540,11 +734,12 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
               {uploadFile ? uploadFile.name : "Click to select a document"}
             </p>
             <p className="text-xs text-[var(--color-text-tertiary)] mt-1">
-              Supports PDF, PNG, JPG, CSV up to 25MB
+              Supports PDF, PNG, JPG and WebP up to 50MB
             </p>
             <input
               ref={fileInputRef}
               type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"
               onChange={(e) => {
                 if (e.target.files?.[0]) setUploadFile(e.target.files[0]);
               }}
@@ -595,7 +790,10 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
                   {reviewingDoc?.filename}
                 </p>
                 <p className="text-[11px] text-[var(--color-text-tertiary)]">
-                  Extracted via {reviewingDoc?.extractionResult?.modelUsed || "AI Engine"}
+                  {DOCUMENT_TYPE_LABELS[reviewingDoc?.documentType || reviewProposal.documentType] ||
+                    "Document"}{" "}
+                  • {reviewConfidence === null ? "confidence unknown" : `${Math.round(reviewConfidence * 100)}% confidence`}
+                  {" "}• {reviewingDoc?.extractionResult?.modelUsed || "AI Engine"}
                 </p>
               </div>
             </div>
@@ -610,6 +808,79 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
               View File
             </a>
           </div>
+
+          {reviewProposal.source?.warning && (
+            <div className="p-3 rounded-[var(--radius-md)] bg-[var(--color-gold-50)] border border-[var(--color-gold-300)] text-xs text-[var(--color-gold-700)] flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{reviewProposal.source.warning}</span>
+            </div>
+          )}
+
+          {reviewConflicts.length > 0 && (
+            <div className="p-3 rounded-[var(--radius-md)] bg-[var(--color-coral-50)] border border-[var(--color-coral-300)] space-y-2">
+              <p className="text-xs font-semibold text-[var(--color-coral-700)] flex items-center gap-1.5">
+                <GitCompare className="w-4 h-4" />
+                Conflicting values need your decision
+              </p>
+              {reviewConflicts.map((conflict, index) => (
+                <div key={`${conflict.field}-${index}`} className="text-xs text-[var(--color-coral-700)]">
+                  <span className="font-semibold">{fieldLabel(conflict.field)}:</span> {conflict.message}
+                  {conflict.values?.length > 0 && (
+                    <span className="block text-[11px] opacity-80">Values: {conflict.values.join(" / ")}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {reviewMissing.length > 0 && (
+            <div className="p-3 rounded-[var(--radius-md)] bg-[var(--color-gold-50)] border border-[var(--color-gold-300)] space-y-1.5">
+              <p className="text-xs font-semibold text-[var(--color-gold-700)] flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4" />
+                Missing information
+              </p>
+              {reviewMissing.map((item, index) => (
+                <p key={`${item.field}-${index}`} className="text-xs text-[var(--color-gold-700)]">
+                  <span className="font-semibold">{item.label || fieldLabel(item.field)}:</span>{" "}
+                  {item.reason}
+                  {item.importance === "critical" && (
+                    <span className="ml-1.5 text-[10px] font-bold uppercase">Required</span>
+                  )}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {reviewAmbiguous.length > 0 && reviewConflicts.length === 0 && (
+            <div className="p-3 rounded-[var(--radius-md)] bg-sky-50 border border-sky-200 space-y-1">
+              <p className="text-xs font-semibold text-sky-700">Values the AI is unsure about</p>
+              {reviewAmbiguous.map((item, index) => (
+                <p key={`${item.field}-${index}`} className="text-xs text-sky-700">
+                  {item.label || fieldLabel(item.field)}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {reviewComputed.lineItemCount > 0 && reviewComputed.reconciles !== null && (
+            <div
+              className={`p-3 rounded-[var(--radius-md)] border text-xs flex items-center gap-2 ${
+                reviewComputed.reconciles
+                  ? "bg-[var(--color-emerald-50)] border-[var(--color-emerald-200)] text-[var(--color-emerald-700)]"
+                  : "bg-[var(--color-coral-50)] border-[var(--color-coral-300)] text-[var(--color-coral-700)]"
+              }`}
+            >
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              {reviewComputed.reconciles
+                ? `The ${reviewComputed.lineItemCount} transaction lines add up to the stated total.`
+                : "The transaction lines do not reconcile with the stated totals."}
+              {reviewComputed.lineItemsTotal && (
+                <span className="ml-auto font-semibold">
+                  Lines: {formatCurrency(reviewComputed.lineItemsTotal, safeCurrency(reviewProposal.currency))}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Entity Type Picker */}
           <div>
@@ -650,12 +921,18 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
 
             <div className="grid grid-cols-2 gap-3">
               <Input
-                label="Extracted Monetary Amount"
+                label={
+                  reviewForm.entityType === "transaction" && reviewForm.lineItems?.length > 0
+                    ? "Document Total (optional)"
+                    : "Extracted Monetary Amount"
+                }
                 type="number"
                 step="0.01"
                 value={reviewForm.amount}
                 onChange={(e) => setReviewForm({ ...reviewForm, amount: e.target.value })}
-                required
+                required={
+                  reviewForm.entityType !== "transaction" || reviewForm.lineItems?.length === 0
+                }
               />
 
               <Input
@@ -692,6 +969,156 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
             />
           </div>
 
+          {reviewForm.entityType === "transaction" && reviewForm.lineItems?.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider">
+                    Extracted Transaction Lines
+                  </p>
+                  <p className="text-[11px] text-[var(--color-text-tertiary)]">
+                    Edit or remove lines before approving. Each line becomes its own transaction.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() =>
+                    setReviewForm({
+                      ...reviewForm,
+                      lineItems: [
+                        ...reviewForm.lineItems,
+                        {
+                          date: reviewForm.date,
+                          description: "",
+                          amount: "",
+                          currency: reviewForm.currency,
+                          direction: "unknown",
+                          category: "",
+                          reference: "",
+                        },
+                      ],
+                    })
+                  }
+                >
+                  Add Line
+                </Button>
+              </div>
+              <div className="max-h-[320px] overflow-auto rounded-[var(--radius-lg)] border border-[var(--color-border)] divide-y divide-[var(--color-border)]">
+                {reviewForm.lineItems.map((item, index) => (
+                  <div key={index} className="p-3 grid grid-cols-12 gap-2 bg-[var(--color-surface)]">
+                    <div className="col-span-3">
+                      <Input
+                        type="date"
+                        value={item.date || ""}
+                        onChange={(e) => {
+                          const next = [...reviewForm.lineItems];
+                          next[index] = { ...next[index], date: e.target.value };
+                          setReviewForm({ ...reviewForm, lineItems: next });
+                        }}
+                      />
+                    </div>
+                    <div className="col-span-4">
+                      <Input
+                        placeholder="Description"
+                        value={item.description || ""}
+                        onChange={(e) => {
+                          const next = [...reviewForm.lineItems];
+                          next[index] = { ...next[index], description: e.target.value };
+                          setReviewForm({ ...reviewForm, lineItems: next });
+                        }}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Amount"
+                        value={item.amount || ""}
+                        onChange={(e) => {
+                          const next = [...reviewForm.lineItems];
+                          next[index] = { ...next[index], amount: e.target.value };
+                          setReviewForm({ ...reviewForm, lineItems: next });
+                        }}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <select
+                        value={item.direction || "unknown"}
+                        onChange={(e) => {
+                          const next = [...reviewForm.lineItems];
+                          next[index] = { ...next[index], direction: e.target.value };
+                          setReviewForm({ ...reviewForm, lineItems: next });
+                        }}
+                        className="w-full px-2.5 py-2 text-sm rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)]"
+                      >
+                        <option value="unknown">Auto</option>
+                        <option value="inflow">Inflow</option>
+                        <option value="outflow">Outflow</option>
+                        <option value="transfer">Transfer</option>
+                      </select>
+                    </div>
+                    <div className="col-span-1 flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = reviewForm.lineItems.filter((_, i) => i !== index);
+                          setReviewForm({ ...reviewForm, lineItems: next });
+                        }}
+                        className="p-1.5 rounded-[var(--radius-sm)] text-[var(--color-text-tertiary)] hover:text-[var(--color-coral-600)] hover:bg-[var(--color-coral-50)]"
+                        title="Remove line"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {reviewProposal.recommendations?.length > 0 && (
+            <div className="p-3 rounded-[var(--radius-md)] bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+              <p className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1.5">
+                Recommended next steps
+              </p>
+              <ul className="space-y-1 text-xs text-[var(--color-text-secondary)]">
+                {reviewProposal.recommendations.map((item, index) => (
+                  <li key={index} className="flex items-start gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[var(--color-emerald-600)]" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {reviewEvidence.length > 0 && (
+            <details className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)]">
+              <summary className="cursor-pointer p-3 text-xs font-semibold text-[var(--color-text-secondary)] flex items-center gap-1.5">
+                <ScrollText className="w-4 h-4" />
+                Source evidence ({reviewEvidence.length})
+              </summary>
+              <div className="px-3 pb-3 space-y-2 max-h-56 overflow-auto">
+                {reviewEvidence.map((item, index) => (
+                  <div
+                    key={`${item.field}-${index}`}
+                    className="p-2.5 rounded-[var(--radius-sm)] bg-[var(--color-surface-2)] text-xs"
+                  >
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-text-secondary)]">
+                      <span>{item.label || fieldLabel(item.field)}</span>
+                      <span className="text-[var(--color-text-tertiary)]">
+                        {item.page ? `Page ${item.page}` : "Source snippet"}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[var(--color-text-secondary)] italic">“{item.text}”</p>
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
+
           {/* Action buttons */}
           <div className="flex items-center justify-between pt-4 border-t border-[var(--color-border)]">
             <Button
@@ -707,7 +1134,11 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
               onClick={handleApprove}
               loading={approving}
             >
-              Approve & Commit to Records
+              {reviewForm.entityType === "transaction" && reviewForm.lineItems?.length > 0
+                ? `Approve ${reviewForm.lineItems.length} Transaction${
+                    reviewForm.lineItems.length === 1 ? "" : "s"
+                  }`
+                : "Approve & Commit to Records"}
             </Button>
           </div>
         </div>

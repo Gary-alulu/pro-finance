@@ -9,6 +9,7 @@ import Document from "@/lib/db/models/Document";
 import DocumentExtraction from "@/lib/db/models/DocumentExtraction";
 import { requireUserId, assertOwnership, withErrorHandling } from "@/lib/auth/session";
 import { extractDocumentData } from "@/lib/ai/extractor";
+import { getFile } from "@/lib/storage/storage";
 import { logAudit, requestMeta } from "@/lib/audit/logAudit";
 import mongoose from "mongoose";
 
@@ -33,12 +34,20 @@ async function postHandler(request, { params }) {
   const startedAt = Date.now();
   let extraction = null;
   try {
-    // Re-extraction works from stored metadata/text; binary re-parsing is not
-    // attempted here (the original text preview was bounded at upload time).
+    let buffer = null;
+    if (doc.storageKey) {
+      try {
+        buffer = await getFile(doc.storageKey);
+      } catch (err) {
+        console.warn("Could not read stored file for re-extraction:", err.message);
+      }
+    }
+
     extraction = await extractDocumentData({
       filename: doc.filename,
       mimeType: doc.mimeType,
       bufferText: doc.extractionResult?.rawText || "",
+      buffer,
       notes: doc.notes,
     });
     extractionRecord.status = "succeeded";

@@ -168,6 +168,7 @@ async function postHandler(request) {
       filename,
       mimeType: sniffed,
       bufferText: bufferTextPreview,
+      buffer,
       notes,
     });
     extractionRecord.status = "succeeded";

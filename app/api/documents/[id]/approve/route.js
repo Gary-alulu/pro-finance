@@ -10,10 +10,68 @@ import Asset from "@/lib/db/models/Asset";
 import Liability from "@/lib/db/models/Liability";
 import Transaction from "@/lib/db/models/Transaction";
 import { requireUserId, assertOwnership, withErrorHandling, validationError } from "@/lib/auth/session";
-import { approveDocumentSchema } from "@/lib/validations/schemas";
+import { approveDocumentSchema, transactionCategories } from "@/lib/validations/schemas";
 import { logAudit, requestMeta } from "@/lib/audit/logAudit";
 import mongoose from "mongoose";
 import { readJsonBody } from "@/lib/security/sanitize";
+
+const CATEGORY_ALIASES = {
+  debit: "expense",
+  credit: "income",
+  deposit: "income",
+  withdrawal: "expense",
+  payment: "expense",
+  purchase: "expense",
+  sale: "asset_sale",
+  salary: "income",
+  wages: "income",
+  bank_fee: "fee",
+  bank_charges: "fee",
+  charges: "fee",
+  commission: "fee",
+  interest_earned: "interest",
+  dividend_income: "dividend",
+  loan_payment: "loan_repayment",
+  mortgage_payment: "loan_repayment",
+  transfer_in: "transfer",
+  transfer_out: "transfer",
+};
+
+function normalizeTransactionCategory(category, direction) {
+  const cleaned = String(category || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  if (transactionCategories.includes(cleaned)) return cleaned;
+  if (CATEGORY_ALIASES[cleaned]) return CATEGORY_ALIASES[cleaned];
+  if (direction === "inflow") return "income";
+  if (direction === "outflow") return "expense";
+  return "other";
+}
+
+function lineItemsPayload(items, { userId, doc, currency, dateVal, fallbackDescription }) {
+  return items.map((item) => {
+    const direction = item.direction || "unknown";
+    return {
+      ownerId: new mongoose.Types.ObjectId(userId),
+      date: item.date ? new Date(item.date) : dateVal,
+      description:
+        item.description || fallbackDescription || `Transaction from ${doc.filename}`,
+      amount: mongoose.Types.Decimal128.fromString(item.amount),
+      currency: item.currency || currency,
+      direction,
+      category: normalizeTransactionCategory(item.category, direction),
+      evidenceStatus: "supported",
+      approvalStatus: "approved",
+      linkedDocumentId: doc._id,
+      notes:
+        item.notes ||
+        `Extracted from ${doc.filename}${item.reference ? ` (ref ${item.reference})` : ""}`,
+    };
+  });
+}
 
 async function postHandler(request, { params }) {
   const userId = await requireUserId();
@@ -39,9 +97,23 @@ async function postHandler(request, { params }) {
 
   assertOwnership(doc.ownerId, userId);
 
+  const extractedLineItems = Array.isArray(data.lineItems) ? data.lineItems : [];
+  if (entityType === "transaction" && extractedLineItems.length === 0 && !data.amount) {
+    return NextResponse.json(
+      { error: "A transaction amount or at least one extracted line item is required" },
+      { status: 400 }
+    );
+  }
+  if (entityType !== "transaction" && !data.amount) {
+    return NextResponse.json(
+      { error: `An amount is required to create a ${entityType}` },
+      { status: 400 }
+    );
+  }
+
   let createdEntity = null;
   const currency = data.currency || "KES";
-  const amountStr = data.amount?.toString() || "0.00";
+  const amountStr = data.amount ? data.amount.toString() : null;
   const dateVal = data.date ? new Date(data.date) : new Date();
 
   if (entityType === "asset") {
@@ -93,22 +165,42 @@ async function postHandler(request, { params }) {
     doc.linkedLiabilityId = liability._id;
     createdEntity = { type: "liability", item: liability.toJSON() };
   } else if (entityType === "transaction") {
-    const tx = await Transaction.create({
-      ownerId: new mongoose.Types.ObjectId(userId),
-      date: dateVal,
-      description: data.name || data.description || `Verified from ${doc.filename}`,
-      amount: mongoose.Types.Decimal128.fromString(amountStr),
-      currency,
-      direction: data.direction || (data.category === "income" ? "inflow" : "outflow"),
-      category: data.category || "expense",
-      evidenceStatus: "supported",
-      approvalStatus: "approved",
-      linkedDocumentId: doc._id,
-      notes: `Evidence verified from document ${doc.filename}`,
-    });
+    if (extractedLineItems.length > 0) {
+      const payload = lineItemsPayload(extractedLineItems, {
+        userId,
+        doc,
+        currency,
+        dateVal,
+        fallbackDescription: data.name || data.description,
+      });
+      const created = await Transaction.insertMany(payload);
 
-    doc.linkedTransactionIds.push(tx._id);
-    createdEntity = { type: "transaction", item: tx.toJSON() };
+      doc.linkedTransactionIds.push(...created.map((tx) => tx._id));
+      createdEntity = {
+        type: "transaction",
+        count: created.length,
+        items: created.map((tx) => tx.toJSON()),
+      };
+    } else {
+      const direction =
+        data.direction || (data.category === "income" ? "inflow" : "outflow");
+      const tx = await Transaction.create({
+        ownerId: new mongoose.Types.ObjectId(userId),
+        date: dateVal,
+        description: data.name || data.description || `Verified from ${doc.filename}`,
+        amount: mongoose.Types.Decimal128.fromString(amountStr),
+        currency,
+        direction,
+        category: normalizeTransactionCategory(data.category, direction),
+        evidenceStatus: "supported",
+        approvalStatus: "approved",
+        linkedDocumentId: doc._id,
+        notes: `Evidence verified from document ${doc.filename}`,
+      });
+
+      doc.linkedTransactionIds.push(tx._id);
+      createdEntity = { type: "transaction", count: 1, items: [tx.toJSON()] };
+    }
   }
 
   // Finalise document state
@@ -119,13 +211,22 @@ async function postHandler(request, { params }) {
 
   await doc.save();
 
+  const auditEntity =
+    createdEntity?.type === "transaction" && createdEntity.count > 5
+      ? {
+          type: "transaction",
+          count: createdEntity.count,
+          ids: createdEntity.items.map((item) => item.id),
+        }
+      : createdEntity;
+
   await logAudit(
     userId,
     "approve",
     "document",
     doc._id.toString(),
     { processingStatus: "awaiting_review" },
-    { processingStatus: "approved", entityType, createdEntity },
+    { processingStatus: "approved", entityType, createdEntity: auditEntity },
     `Approved extraction from "${doc.filename}" as ${entityType}`,
     requestMeta(request)
   );
