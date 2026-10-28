@@ -8,12 +8,29 @@ import Document from "@/lib/db/models/Document";
 import Transaction from "@/lib/db/models/Transaction";
 import Dividend from "@/lib/db/models/Dividend";
 import RelationshipSuggestion from "@/lib/db/models/RelationshipSuggestion";
+import User from "@/lib/db/models/User";
 import { requireUserId, withErrorHandling } from "@/lib/auth/session";
 import { discoverRelationships } from "@/lib/ai/relationshipDiscovery";
+import { mergeSettings } from "@/lib/settings/defaults";
 
 async function postHandler() {
   const userId = await requireUserId();
   await connectDB();
+
+  const user = await User.findById(userId).select("preferredCurrency settings").lean();
+  const ai = mergeSettings(user?.settings, {
+    preferredCurrency: user?.preferredCurrency,
+  }).ai;
+  if (!ai.relationshipSuggestions) {
+    return NextResponse.json(
+      {
+        error:
+          "Relationship suggestions are disabled. Enable them in Settings → AI & Automation.",
+      },
+      { status: 403 }
+    );
+  }
+
   const [assets, liabilities, investments, documents, transactions, dividends] = await Promise.all([
     Asset.find({ ownerId: userId }).lean(),
     Liability.find({ ownerId: userId }).lean(),

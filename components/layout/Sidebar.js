@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
+  Activity,
   Network,
   Landmark,
   TrendingUp,
@@ -24,15 +25,16 @@ import {
 import { signOut } from "next-auth/react";
 
 const NAV_ITEMS = [
-  { href: "/overview",       label: "Overview",          icon: LayoutDashboard },
-  { href: "/map",            label: "Financial Map",     icon: Network },
-  { href: "/assets",         label: "Assets & Liabilities", icon: Landmark },
-  { href: "/investments",    label: "Investments",       icon: TrendingUp },
-  { href: "/transactions",   label: "Transactions",      icon: ArrowLeftRight },
-  { href: "/documents",      label: "Documents",         icon: FileText },
-  { href: "/invoices",       label: "Invoices",          icon: ReceiptText },
-  { href: "/reports",        label: "Reports",           icon: BarChart3 },
-  { href: "/accountability", label: "Accountability",    icon: ShieldCheck },
+  { href: "/overview",         label: "Overview",            icon: LayoutDashboard },
+  { href: "/command-centre",   label: "Command Centre",      icon: Activity, badge: "New" },
+  { href: "/map",              label: "Financial Map",       icon: Network },
+  { href: "/assets",           label: "Assets & Liabilities",icon: Landmark },
+  { href: "/investments",      label: "Investments",         icon: TrendingUp },
+  { href: "/transactions",     label: "Transactions",        icon: ArrowLeftRight },
+  { href: "/documents",        label: "Documents",           icon: FileText },
+  { href: "/invoices",         label: "Invoices",            icon: ReceiptText },
+  { href: "/reports",          label: "Reports",             icon: BarChart3 },
+  { href: "/accountability",   label: "Accountability",      icon: ShieldCheck },
 ];
 
 const BOTTOM_ITEMS = [
@@ -244,9 +246,22 @@ function SidebarItem({ item, collapsed, active }) {
             animate={{ opacity: 1, width: "auto" }}
             exit={{ opacity: 0, width: 0 }}
             transition={{ duration: 0.2 }}
-            className="whitespace-nowrap overflow-hidden"
+            className="flex items-center gap-2 whitespace-nowrap overflow-hidden flex-1 min-w-0"
           >
-            {item.label}
+            <span className="truncate">{item.label}</span>
+            {item.badge && (
+              <span
+                className="flex-shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                style={{
+                  fontSize: "0.6rem",
+                  background: "rgba(16,185,129,0.2)",
+                  color: "var(--color-emerald-400)",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                {item.badge}
+              </span>
+            )}
           </motion.span>
         )}
       </AnimatePresence>

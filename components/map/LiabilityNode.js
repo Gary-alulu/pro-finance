@@ -25,7 +25,7 @@ export default memo(function LiabilityNode({ data, selected }) {
         <span className="p-1 rounded bg-[var(--color-coral-50)] text-[var(--color-coral-600)]">
           <Landmark className="w-3.5 h-3.5" />
         </span>
-        {data.interestRate && (
+        {!data.hideLabel && data.interestRate && (
           <span className="text-[10px] font-semibold text-[var(--color-text-secondary)]">
             {data.interestRate}% APR
           </span>
@@ -34,10 +34,10 @@ export default memo(function LiabilityNode({ data, selected }) {
 
       <div className="mt-2">
         <h4 className="text-xs font-semibold text-[var(--color-text-primary)] line-clamp-1">
-          {data.title}
+          {data.hideLabel ? "Liability" : data.title}
         </h4>
         <div className="text-sm font-bold text-[var(--color-coral-600)] mt-0.5">
-          {formatCurrency(data.amount, data.currency || "KES")}
+          {data.maskAmount ? "••••" : formatCurrency(data.amount, data.currency || "KES")}
         </div>
       </div>
     </div>

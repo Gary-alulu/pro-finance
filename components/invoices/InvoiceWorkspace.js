@@ -10,7 +10,12 @@ import Button from "@/components/ui/Button";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 import InvoiceEditor from "./InvoiceEditor";
 import { createEmptyInvoice } from "@/lib/invoices/factories";
-import { getDraft, readInvoiceSettings } from "@/lib/invoices/localDrafts";
+import {
+  getDraft,
+  readInvoiceSettings,
+  saveInvoiceSettings,
+} from "@/lib/invoices/localDrafts";
+import { invoiceSettingsFromUserSettings } from "@/lib/settings/defaults";
 
 export default function InvoiceWorkspace({ id = null }) {
   const router = useRouter();
@@ -22,8 +27,27 @@ export default function InvoiceWorkspace({ id = null }) {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const settings = readInvoiceSettings();
+    let cancelled = false;
+
+    async function load() {
+      // Server-stored invoice defaults are authoritative; the local copy stays
+      // as an offline fallback for this browser.
+      let settings = readInvoiceSettings();
+      try {
+        const res = await fetch("/api/user/settings");
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.settings) {
+            settings = saveInvoiceSettings(
+              invoiceSettingsFromUserSettings(json.settings)
+            );
+          }
+        }
+      } catch {
+        // Keep the browser copy when the network is unavailable.
+      }
+      if (cancelled) return;
+
       if (!id) {
         setState({
           ready: true,
@@ -40,9 +64,12 @@ export default function InvoiceWorkspace({ id = null }) {
         settings,
         missing: !draft,
       });
-    }, 0);
+    }
 
-    return () => clearTimeout(timer);
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   if (!state.ready) return <PageSkeleton cards={0} rows={6} />;

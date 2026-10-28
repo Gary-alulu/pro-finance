@@ -4,7 +4,7 @@
 
 import { memo } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { FileText, ShieldCheck, Clock } from "lucide-react";
+import { FileText } from "lucide-react";
 
 export default memo(function DocumentNode({ data, selected }) {
   const isApproved = data.status === "approved";
@@ -34,10 +34,14 @@ export default memo(function DocumentNode({ data, selected }) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-[var(--color-text-primary)] line-clamp-1 text-[11px]">
-            {data.title}
+            {data.hideLabel ? "Document" : data.title}
           </p>
           <p className="text-[10px] text-[var(--color-text-tertiary)] capitalize">
-            {isApproved ? "Verified Evidence" : "Awaiting Review"}
+            {data.hideLabel
+              ? data.documentType?.replace(/_/g, " ") || "Evidence"
+              : isApproved
+              ? "Verified Evidence"
+              : "Awaiting Review"}
           </p>
         </div>
       </div>

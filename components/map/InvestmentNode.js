@@ -25,7 +25,7 @@ export default memo(function InvestmentNode({ data, selected }) {
         <span className="p-1 rounded bg-sky-50 text-sky-600">
           <LineChart className="w-3.5 h-3.5" />
         </span>
-        {data.ticker && (
+        {!data.hideLabel && data.ticker && (
           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-surface-2)] text-[var(--color-text-secondary)]">
             {data.ticker}
           </span>
@@ -34,10 +34,10 @@ export default memo(function InvestmentNode({ data, selected }) {
 
       <div className="mt-2">
         <h4 className="text-xs font-semibold text-[var(--color-text-primary)] line-clamp-1">
-          {data.title}
+          {data.hideLabel ? "Investment" : data.title}
         </h4>
         <div className="text-sm font-bold text-[var(--color-text-primary)] mt-0.5">
-          {formatCurrency(data.amount, data.currency || "KES")}
+          {data.maskAmount ? "••••" : formatCurrency(data.amount, data.currency || "KES")}
         </div>
       </div>
     </div>

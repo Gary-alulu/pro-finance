@@ -7,7 +7,9 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import Document from "@/lib/db/models/Document";
 import DocumentExtraction from "@/lib/db/models/DocumentExtraction";
+import User from "@/lib/db/models/User";
 import { requireUserId, assertOwnership, withErrorHandling } from "@/lib/auth/session";
+import { mergeSettings } from "@/lib/settings/defaults";
 import { extractDocumentData } from "@/lib/ai/extractor";
 import { buildReconciliationSuggestions } from "@/lib/reconciliation/service";
 import { getFile } from "@/lib/storage/storage";
@@ -25,6 +27,20 @@ async function postHandler(request, { params }) {
   const doc = await Document.findById(id);
   if (!doc) return NextResponse.json({ error: "Document not found" }, { status: 404 });
   assertOwnership(doc.ownerId, userId);
+
+  const account = await User.findById(userId).select("preferredCurrency settings").lean();
+  const ai = mergeSettings(account?.settings, {
+    preferredCurrency: account?.preferredCurrency,
+  }).ai;
+  if (!ai.extractionEnabled) {
+    return NextResponse.json(
+      {
+        error:
+          "AI document extraction is disabled. Enable it in Settings → AI & Automation.",
+      },
+      { status: 403 }
+    );
+  }
 
   const extractionRecord = await DocumentExtraction.create({
     ownerId: new mongoose.Types.ObjectId(userId),

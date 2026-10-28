@@ -12,8 +12,10 @@ import InvestmentHolding from "@/lib/db/models/InvestmentHolding";
 import ExchangeRate from "@/lib/db/models/ExchangeRate";
 import { requireUserId, withErrorHandling } from "@/lib/auth/session";
 import { logAudit, requestMeta } from "@/lib/audit/logAudit";
+import User from "@/lib/db/models/User";
 import { recordedNetWorth } from "@/lib/finance/calculations";
 import { DEFAULT_CURRENCY } from "@/lib/finance/currency";
+import { mergeSettings } from "@/lib/settings/defaults";
 import mongoose from "mongoose";
 
 async function getHandler(request) {
@@ -45,12 +47,17 @@ async function postHandler(request) {
   const userId = await requireUserId();
   await connectDB();
 
-  const [assets, liabilities, holdings, rateDocs] = await Promise.all([
+  const [assets, liabilities, holdings, rateDocs, account] = await Promise.all([
     Asset.find({ ownerId: userId, status: "active" }).select("-valuationHistory").lean(),
     Liability.find({ ownerId: userId, status: "active" }).lean(),
     InvestmentHolding.find({ ownerId: userId, status: "active" }).select("-priceHistory").lean(),
     ExchangeRate.find({ ownerId: userId }).lean(),
+    User.findById(userId).select("preferredCurrency settings").lean(),
   ]);
+
+  const settings = mergeSettings(account?.settings, {
+    preferredCurrency: account?.preferredCurrency,
+  });
 
   const nw = recordedNetWorth({
     assets: assets.map((a) => ({
@@ -72,7 +79,8 @@ async function postHandler(request) {
       rate: r.rate?.toString(),
       asOf: r.asOf,
     })),
-    reportingCurrency: DEFAULT_CURRENCY,
+    reportingCurrency:
+      settings.financial.reportingCurrency || account?.preferredCurrency || DEFAULT_CURRENCY,
   });
 
   const snapshot = await FinancialSnapshot.create({

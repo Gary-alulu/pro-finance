@@ -4,7 +4,7 @@
 
 import { memo } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { Building2, TrendingUp, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { formatCurrency } from "@/lib/finance/currency";
 
 export default memo(function AssetNode({ data, selected }) {
@@ -32,25 +32,31 @@ export default memo(function AssetNode({ data, selected }) {
         <span className="p-1 rounded bg-[var(--color-emerald-50)] text-[var(--color-emerald-600)]">
           <Building2 className="w-3.5 h-3.5" />
         </span>
-        <span
-          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-            isStale
-              ? "bg-[var(--color-coral-50)] text-[var(--color-coral-700)]"
-              : isWarning
-              ? "bg-[var(--color-gold-50)] text-[var(--color-gold-700)]"
-              : "bg-[var(--color-emerald-50)] text-[var(--color-emerald-700)]"
-          }`}
-        >
-          {isStale ? "Stale Valuation" : isWarning ? "Review Soon" : "Verified"}
-        </span>
+        {data.hideLabel ? (
+          <span className="text-[10px] font-semibold text-[var(--color-text-tertiary)]">
+            Asset
+          </span>
+        ) : (
+          <span
+            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+              isStale
+                ? "bg-[var(--color-coral-50)] text-[var(--color-coral-700)]"
+                : isWarning
+                ? "bg-[var(--color-gold-50)] text-[var(--color-gold-700)]"
+                : "bg-[var(--color-emerald-50)] text-[var(--color-emerald-700)]"
+            }`}
+          >
+            {isStale ? "Stale Valuation" : isWarning ? "Review Soon" : "Verified"}
+          </span>
+        )}
       </div>
 
       <div className="mt-2">
         <h4 className="text-xs font-semibold text-[var(--color-text-primary)] line-clamp-1">
-          {data.title}
+          {data.hideLabel ? "Asset" : data.title}
         </h4>
         <div className="text-sm font-bold text-[var(--color-text-primary)] mt-0.5">
-          {formatCurrency(data.amount, data.currency || "KES")}
+          {data.maskAmount ? "••••" : formatCurrency(data.amount, data.currency || "KES")}
         </div>
       </div>
     </div>

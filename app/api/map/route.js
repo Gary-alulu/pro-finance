@@ -10,14 +10,16 @@ import Document from "@/lib/db/models/Document";
 import Transaction from "@/lib/db/models/Transaction";
 import RecordRelationship from "@/lib/db/models/RecordRelationship";
 import RelationshipSuggestion from "@/lib/db/models/RelationshipSuggestion";
+import User from "@/lib/db/models/User";
 import { requireUserId, withErrorHandling } from "@/lib/auth/session";
+import { mergeSettings } from "@/lib/settings/defaults";
 import Decimal from "decimal.js";
 
 async function getHandler() {
   const userId = await requireUserId();
   await connectDB();
 
-  const [assets, liabilities, investments, documents, transactions, relationships, suggestions] =
+  const [assets, liabilities, investments, allDocuments, transactions, relationships, suggestions, user] =
     await Promise.all([
       Asset.find({ ownerId: userId, status: "active" }).select("-valuationHistory").lean(),
       Liability.find({ ownerId: userId, status: "active" }).lean(),
@@ -26,7 +28,19 @@ async function getHandler() {
       Transaction.find({ ownerId: userId }).sort({ date: -1 }).limit(20).lean(),
       RecordRelationship.find({ ownerId: userId }).lean(),
       RelationshipSuggestion.find({ ownerId: userId, status: "suggested" }).sort({ confidence: -1 }).limit(50).lean(),
+      User.findById(userId).select("preferredCurrency settings").lean(),
     ]);
+
+  // The map is personalised by the account's persisted preferences.
+  const mapSettings = mergeSettings(user?.settings, {
+    preferredCurrency: user?.preferredCurrency,
+  }).map;
+  const visibleTypes = new Set(mapSettings.visibleNodeTypes || []);
+  const columns = mapSettings.layout === "columns";
+  const maskAmount = !mapSettings.showValues;
+  const hideLabel = !mapSettings.showNodeLabels;
+  const documents =
+    mapSettings.density === "compact" ? allDocuments.slice(0, 10) : allDocuments;
 
   const nodes = [];
   const edges = [];
@@ -43,12 +57,12 @@ async function getHandler() {
   });
 
   // 2. Asset Nodes (Positioned on the Left / Top-Left)
-  assets.forEach((asset, idx) => {
+  if (visibleTypes.has("asset")) assets.forEach((asset, idx) => {
     const nodeId = `asset-${asset._id.toString()}`;
     const angle = (idx / Math.max(assets.length, 1)) * Math.PI - Math.PI / 2;
     const radius = 320;
-    const x = 450 - Math.cos(angle) * radius;
-    const y = 350 + Math.sin(angle) * (radius * 0.85);
+    const x = columns ? 110 : 450 - Math.cos(angle) * radius;
+    const y = columns ? 90 + idx * 120 : 350 + Math.sin(angle) * (radius * 0.85);
 
     // Freshness check
     const daysAgo = asset.currentValue?.asOf
@@ -69,6 +83,8 @@ async function getHandler() {
         currency: asset.currency || "KES",
         status,
         asOf: asset.currentValue?.asOf,
+        maskAmount,
+        hideLabel,
       },
     });
 
@@ -87,12 +103,12 @@ async function getHandler() {
   });
 
   // 3. Liability Nodes (Positioned on the Right / Top-Right)
-  liabilities.forEach((liab, idx) => {
+  if (visibleTypes.has("liability")) liabilities.forEach((liab, idx) => {
     const nodeId = `liability-${liab._id.toString()}`;
     const angle = (idx / Math.max(liabilities.length, 1)) * Math.PI - Math.PI / 2;
     const radius = 320;
-    const x = 450 + Math.cos(angle) * radius;
-    const y = 350 + Math.sin(angle) * (radius * 0.85);
+    const x = columns ? 820 : 450 + Math.cos(angle) * radius;
+    const y = columns ? 90 + idx * 120 : 350 + Math.sin(angle) * (radius * 0.85);
 
     nodes.push({
       id: nodeId,
@@ -107,6 +123,8 @@ async function getHandler() {
         currency: liab.currency || "KES",
         interestRate: liab.interestRate ? liab.interestRate.toString() : null,
         lender: liab.lender,
+        maskAmount,
+        hideLabel,
       },
     });
 
@@ -138,10 +156,10 @@ async function getHandler() {
   });
 
   // 4. Investment Nodes (Bottom Left)
-  investments.forEach((inv, idx) => {
+  if (visibleTypes.has("investment")) investments.forEach((inv, idx) => {
     const nodeId = `investment-${inv._id.toString()}`;
-    const x = 150 + (idx % 3) * 200;
-    const y = 620 + Math.floor(idx / 3) * 120;
+    const x = columns ? 460 : 150 + (idx % 3) * 200;
+    const y = columns ? 120 + idx * 110 : 620 + Math.floor(idx / 3) * 120;
 
     let marketVal = null;
     if (inv.units && inv.currentPrice?.price) {
@@ -164,6 +182,8 @@ async function getHandler() {
         type: inv.type,
         amount: marketVal,
         currency: inv.currency || "KES",
+        maskAmount,
+        hideLabel,
       },
     });
 
@@ -181,10 +201,10 @@ async function getHandler() {
   });
 
   // 5. Document Nodes (Far Left & Far Right linking to assets/liabilities)
-  documents.forEach((doc, idx) => {
+  if (visibleTypes.has("document")) documents.forEach((doc, idx) => {
     const nodeId = `document-${doc._id.toString()}`;
-    const x = idx % 2 === 0 ? 30 : 850;
-    const y = 100 + (idx * 90);
+    const x = columns ? (idx % 2 === 0 ? 30 : 1050) : idx % 2 === 0 ? 30 : 850;
+    const y = 100 + idx * 90;
 
     nodes.push({
       id: nodeId,
@@ -196,6 +216,7 @@ async function getHandler() {
         title: doc.filename,
         documentType: doc.documentType,
         status: doc.processingStatus,
+        hideLabel,
       },
     });
 
@@ -253,7 +274,7 @@ async function getHandler() {
   });
 
   // 7. AI relationship suggestions — dashed, dashed label, never confirmed
-  suggestions.forEach((sug) => {
+  if (mapSettings.showAiSuggestions) suggestions.forEach((sug) => {
     const sourceNode = `${sug.source.kind}-${sug.source.refId.toString()}`;
     const targetNode = `${sug.target.kind}-${sug.target.refId.toString()}`;
     if (!nodes.some((n) => n.id === sourceNode) || !nodes.some((n) => n.id === targetNode)) return;
@@ -274,7 +295,10 @@ async function getHandler() {
   return NextResponse.json({
     nodes,
     edges,
-    suggestions: suggestions.map((s) => ({ ...s, id: s._id.toString() })),
+    layout: mapSettings.layout,
+    suggestions: mapSettings.showAiSuggestions
+      ? suggestions.map((s) => ({ ...s, id: s._id.toString() }))
+      : [],
   });
 }
 

@@ -11,6 +11,7 @@ import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
+import { SettingsProvider } from "@/components/providers/SettingsProvider";
 
 // Command palette (framer-motion + 300 lines) is only needed once the user
 // opens it — keep it out of the shell's initial client bundle.
@@ -18,8 +19,12 @@ const CommandPalette = dynamic(() => import("@/components/ui/CommandPalette"), {
   ssr: false,
 });
 
-export default function AppShell({ user, children }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+export default function AppShell({ user, settings, children }) {
+  const serverCollapsed = Boolean(settings?.appearance?.sidebarCollapsed);
+  // A local override keeps the toggle instant while the server value remains
+  // the source of truth for the next full load.
+  const [sidebarOverride, setSidebarOverride] = useState(null);
+  const sidebarCollapsed = sidebarOverride ?? serverCollapsed;
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   // Mount the palette bundle only after it is first requested.
@@ -32,15 +37,6 @@ export default function AppShell({ user, children }) {
     setLastPathname(pathname);
     setMobileSidebarOpen(false);
   }
-
-  // Hydrate sidebar collapse preference from localStorage after mount
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const stored = localStorage.getItem("pf-sidebar-collapsed");
-      if (stored !== null) setSidebarCollapsed(JSON.parse(stored));
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Global ⌘K / Ctrl+K shortcut
   useEffect(() => {
@@ -60,15 +56,21 @@ export default function AppShell({ user, children }) {
   }
 
   function toggleSidebar() {
-    setSidebarCollapsed((v) => {
-      localStorage.setItem("pf-sidebar-collapsed", JSON.stringify(!v));
-      return !v;
-    });
+    const next = !sidebarCollapsed;
+    setSidebarOverride(next);
+    localStorage.setItem("pf-sidebar-collapsed", JSON.stringify(next));
+    // Persist quietly; the server stays the source of truth across devices.
+    fetch("/api/user/settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ settings: { appearance: { sidebarCollapsed: next } } }),
+    }).catch(() => {});
   }
 
   return (
-    <ThemeProvider>
-      <ToastProvider>
+    <ThemeProvider initialAppearance={settings?.appearance}>
+      <SettingsProvider initialSettings={settings}>
+        <ToastProvider>
         <div className="flex h-screen overflow-hidden" style={{ background: "var(--color-bg)" }}>
           {/* Skip link — first focusable element for keyboard users */}
           <a
@@ -157,7 +159,8 @@ export default function AppShell({ user, children }) {
             <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
           )}
         </div>
-      </ToastProvider>
+        </ToastProvider>
+      </SettingsProvider>
     </ThemeProvider>
   );
 }

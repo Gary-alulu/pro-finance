@@ -1,106 +1,46 @@
 "use client";
 // components/ui/Dropdown.js
-// Custom dropdown matching the platform's premium design.
-// Uses a button trigger with a floating menu — fully styleable across browsers.
+// Custom dropdown matching the platform's unified design system.
+// Wraps Select with a direct-value onChange signature: onChange(selectedValue).
 
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Check } from "lucide-react";
+import { forwardRef } from "react";
+import Select from "./Select";
 
-export default function Dropdown({
-  value,
-  onChange,
-  options = [],
-  placeholder = "Select...",
-  label,
-  className = "",
-  size = "sm",
-  variant = "subtle",
-  disabled = false,
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  const selected = options.find((o) => o.value === value);
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    function handleEsc(e) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    if (open) document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
-  }, [open]);
-
-  const sizes = {
-    sm: "px-3 py-1.5 text-xs",
-    md: "px-3.5 py-2 text-sm",
-  };
-
-  const variants = {
-    subtle: "bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] border-[var(--color-border)] text-[var(--color-text-secondary)]",
-    default: "bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)] border-[var(--color-border)] text-[var(--color-text-primary)]",
-    ghost: "bg-transparent hover:bg-[var(--color-surface-2)] border-transparent text-[var(--color-text-secondary)]",
-  };
-
+export const Dropdown = forwardRef(function Dropdown(
+  {
+    value,
+    onChange,
+    options = [],
+    placeholder = "Select...",
+    label,
+    className = "",
+    containerClassName = "",
+    size = "sm",
+    variant = "subtle",
+    disabled = false,
+    ...props
+  },
+  ref
+) {
   return (
-    <div ref={ref} className={`relative inline-flex flex-col ${className}`}>
-      {label && (
-        <span className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1.5">
-          {label}
-        </span>
-      )}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => !disabled && setOpen((o) => !o)}
-        className={`inline-flex items-center gap-2 rounded-[var(--radius-md)] border transition-all duration-150 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed ${sizes[size]} ${variants[variant]} ${open ? "border-[var(--color-emerald-500)] ring-1 ring-[var(--color-emerald-100)]" : ""}`}
-      >
-        <span className="flex-1 text-left truncate">
-          {selected?.label || placeholder}
-        </span>
-        <ChevronDown className={`w-3.5 h-3.5 text-[var(--color-text-tertiary)] transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.98 }}
-            animate={{ opacity: 1, y: 6, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.98 }}
-            transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
-            className="absolute left-0 top-full z-[60] min-w-[calc(100%+0.5rem)] w-max max-h-72 overflow-y-auto overflow-x-hidden rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[0_32px_80px_-32px_rgba(0,0,0,0.7)] ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-md py-1.5"
-          >
-            {options.map((opt) => {
-              const isSelected = opt.value === value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => {
-                    onChange(opt.value);
-                    setOpen(false);
-                  }}
-                  className={`group w-full flex items-center gap-2 px-2.5 mx-1.5 my-0.5 rounded-[var(--radius-md)] text-left transition-colors duration-150 ${
-                    isSelected
-                      ? "bg-[var(--color-emerald-50)] text-[var(--color-emerald-700)]"
-                      : "text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)]"
-                  }`}
-                >
-                  <span className="flex-1 text-xs py-1.5">{opt.label}</span>
-                  {isSelected && <Check className="w-3.5 h-3.5" />}
-                </button>
-              );
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <Select
+      ref={ref}
+      value={value}
+      onChange={(e) => {
+        const val = e && e.target ? e.target.value : e;
+        onChange?.(val);
+      }}
+      options={options}
+      placeholder={placeholder}
+      label={label}
+      size={size}
+      variant={variant}
+      disabled={disabled}
+      className={className}
+      containerClassName={containerClassName}
+      {...props}
+    />
   );
-}
+});
+
+export default Dropdown;

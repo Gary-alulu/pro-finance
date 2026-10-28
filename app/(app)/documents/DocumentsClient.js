@@ -1044,20 +1044,21 @@ export default function DocumentsClient({ user, focusId = null, newRecord = fals
                       />
                     </div>
                     <div className="col-span-2">
-                      <select
+                      <Select
+                        size="sm"
                         value={item.direction || "unknown"}
                         onChange={(e) => {
                           const next = [...reviewForm.lineItems];
                           next[index] = { ...next[index], direction: e.target.value };
                           setReviewForm({ ...reviewForm, lineItems: next });
                         }}
-                        className="w-full px-2.5 py-2 text-sm rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)]"
-                      >
-                        <option value="unknown">Auto</option>
-                        <option value="inflow">Inflow</option>
-                        <option value="outflow">Outflow</option>
-                        <option value="transfer">Transfer</option>
-                      </select>
+                        options={[
+                          { value: "unknown", label: "Auto" },
+                          { value: "inflow", label: "Inflow" },
+                          { value: "outflow", label: "Outflow" },
+                          { value: "transfer", label: "Transfer" },
+                        ]}
+                      />
                     </div>
                     <div className="col-span-1 flex items-center justify-center">
                       <button

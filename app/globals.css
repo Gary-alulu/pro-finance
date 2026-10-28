@@ -193,6 +193,20 @@ body {
   }
 }
 
+/* Explicit user preference overrides the media query in both directions. */
+html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ─── Density ────────────────────────────────────────────────────────────── */
+/* Tailwind sizes are rem-based, so scaling the root font adjusts the whole UI. */
+html[data-density="compact"] { font-size: 14px; }
+html[data-density="comfortable"] { font-size: 16px; }
+html[data-density="spacious"] { font-size: 17px; }
+
 /* ─── Tailwind v4 theme extension ────────────────────────────────────────── */
 @theme inline {
   /* Map CSS variables → Tailwind color tokens */

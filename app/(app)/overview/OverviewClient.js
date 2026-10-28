@@ -53,13 +53,16 @@ export default function OverviewClient({
   initialAllocation = null,
   initialTransactions = null,
   initialAccountability = null,
+  initialHideValues = false,
+  dashboardLayout = "balanced",
 }) {
   const [summary, setSummary] = useState(initialSummary);
   const [loading, setLoading] = useState(initialSummary === null);
   const [error, setError] = useState(null);
-  const [hideValues, setHideValues] = useState(false);
+  const [hideValues, setHideValues] = useState(initialHideValues);
   const [attention, setAttention] = useState(initialAttention);
-  const currency = user?.preferredCurrency || "KES";
+  const currency =
+    summary?.reportingCurrency || user?.preferredCurrency || "KES";
 
   useEffect(() => {
     // Server already provided the summary — only fetch if it was missing.
@@ -254,10 +257,18 @@ export default function OverviewClient({
         transition={{ duration: 0.35, delay: 0.25 }}
         className="grid gap-4 grid-cols-1 lg:grid-cols-3 items-stretch"
       >
-        <div className="h-full">
+        <div
+          className={`h-full ${
+            dashboardLayout === "accountability_first" ? "lg:order-2" : "lg:order-1"
+          }`}
+        >
           <AssetAllocationChart currency={currency} initialData={initialAllocation} />
         </div>
-        <div className="h-full">
+        <div
+          className={`h-full ${
+            dashboardLayout === "accountability_first" ? "lg:order-1" : "lg:order-2"
+          }`}
+        >
           <AccountabilityPanel initialItems={initialAccountability} />
         </div>
         <div className="h-full">

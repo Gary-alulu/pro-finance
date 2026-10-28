@@ -50,6 +50,7 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema),
@@ -57,6 +58,7 @@ export default function RegisterPage() {
   });
 
   const passwordValue = useWatch({ control, name: "password", defaultValue: "" });
+  const preferredCurrency = useWatch({ control, name: "preferredCurrency", defaultValue: "KES" });
 
   async function onSubmit(data) {
     setIsLoading(true);
@@ -188,8 +190,8 @@ export default function RegisterPage() {
           icon={Coins}
         >
           <Dropdown
-            value={undefined}
-            onChange={() => {}}
+            value={preferredCurrency}
+            onChange={(code) => setValue("preferredCurrency", code)}
             options={SUPPORTED_CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} — ${c.name}` }))}
             placeholder="KES — Kenyan Shilling"
             size="md"

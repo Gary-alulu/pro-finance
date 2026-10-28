@@ -62,7 +62,7 @@ function getPageInfo(pathname) {
 export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
   const pathname = usePathname();
   const { title } = getPageInfo(pathname);
-  const { theme, toggle: toggleTheme } = useTheme();
+  const { theme, toggle: toggleTheme, mounted } = useTheme();
   const [profileOpen, setProfileOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
 
@@ -145,13 +145,31 @@ export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
         {/* Theme toggle */}
         <button
           id="theme-toggle-btn"
+          type="button"
           onClick={toggleTheme}
-          className="p-2 rounded-lg transition-colors"
+          suppressHydrationWarning
+          className="p-2 rounded-lg transition-colors cursor-pointer"
           style={{ color: "var(--color-text-secondary)" }}
-          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-          title={theme === "dark" ? "Light theme" : "Dark theme"}
+          aria-label={
+            mounted
+              ? theme === "dark"
+                ? "Switch to light theme"
+                : "Switch to dark theme"
+              : "Toggle theme"
+          }
+          title={
+            mounted
+              ? theme === "dark"
+                ? "Light theme"
+                : "Dark theme"
+              : "Toggle theme"
+          }
         >
-          {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+          {mounted ? (
+            theme === "dark" ? <Sun size={17} /> : <Moon size={17} />
+          ) : (
+            <span className="inline-block w-[17px] h-[17px]" />
+          )}
         </button>
 
         {/* Quick create */}
@@ -178,17 +196,16 @@ export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
                 animate={{ opacity: 1, y: 6, scale: 1 }}
                 exit={{ opacity: 0, y: -6, scale: 0.98 }}
                 transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
-                className="absolute right-0 top-full mt-1 w-56 rounded-[var(--radius-xl)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[0_32px_80px_-32px_rgba(0,0,0,0.7)] ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-md z-[var(--z-modal)]"
+                className="absolute right-0 top-full mt-1.5 w-56 rounded-[var(--radius-xl)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[0_20px_50px_-12px_rgba(26,26,24,0.18)] dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.7)] ring-1 ring-black/5 dark:ring-white/10 backdrop-blur-md z-[var(--z-modal)]"
               >
-                <div className="py-1.5">
+                <div className="p-1.5 space-y-0.5">
                   {QUICK_CREATE_ITEMS.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="group flex items-center gap-2.5 px-2.5 mx-1.5 py-1.5 my-0.5 rounded-[var(--radius-md)] text-sm transition-colors duration-150 hover:bg-[var(--color-surface-2)]"
-                      style={{ color: "var(--color-text-primary)" }}
+                      className="group w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-xs font-medium transition-colors duration-150 hover:bg-[var(--color-surface-2)] text-[var(--color-text-primary)]"
                     >
-                      <item.icon size={15} style={{ color: "var(--color-text-tertiary)" }} />
+                      <item.icon size={14} className="text-[var(--color-text-tertiary)] group-hover:text-[var(--color-emerald-600)] transition-colors" />
                       {item.label}
                     </Link>
                   ))}
@@ -249,42 +266,40 @@ export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
                 animate={{ opacity: 1, y: 6, scale: 1 }}
                 exit={{ opacity: 0, y: -6, scale: 0.98 }}
                 transition={{ duration: 0.16, ease: [0.25, 0.1, 0.25, 1] }}
-                className="absolute right-0 top-full mt-1 w-56 rounded-[var(--radius-xl)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[0_32px_80px_-32px_rgba(0,0,0,0.7)] ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-md z-[var(--z-modal)]"
+                className="absolute right-0 top-full mt-1.5 w-60 rounded-[var(--radius-xl)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-[0_20px_50px_-12px_rgba(26,26,24,0.18)] dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.7)] ring-1 ring-black/5 dark:ring-white/10 backdrop-blur-md z-[var(--z-modal)]"
               >
                 {/* User info */}
                 <div
-                  className="px-3.5 py-3"
+                  className="px-4 py-3"
                   style={{ borderBottom: "1px solid var(--color-border)" }}
                 >
-                  <p className="text-sm font-medium" style={{ color: "var(--color-text-primary)" }}>
+                  <p className="text-xs font-semibold text-[var(--color-text-primary)]">
                     {user?.name || "Account"}
                   </p>
-                  <p className="text-xs truncate" style={{ color: "var(--color-text-tertiary)" }}>
+                  <p className="text-[11px] truncate text-[var(--color-text-tertiary)] mt-0.5">
                     {user?.email}
                   </p>
                   {user?.preferredCurrency && (
-                    <p className="text-xs mt-0.5" style={{ color: "var(--color-text-tertiary)" }}>
-                      Reporting currency: {user.preferredCurrency}
-                    </p>
+                    <div className="mt-1.5 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--color-surface-2)] text-[var(--color-emerald-700)] dark:text-[var(--color-emerald-400)]">
+                      Currency: {user.preferredCurrency}
+                    </div>
                   )}
                 </div>
 
                 {/* Menu items */}
-                <div className="py-1.5">
+                <div className="p-1.5 space-y-0.5">
                   <Link
                     href="/settings"
-                    className="group flex items-center gap-2.5 px-2.5 mx-1.5 py-1.5 my-0.5 rounded-[var(--radius-md)] text-sm transition-colors duration-150 hover:bg-[var(--color-surface-2)]"
-                    style={{ color: "var(--color-text-primary)" }}
+                    className="group w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-xs font-medium transition-colors duration-150 hover:bg-[var(--color-surface-2)] text-[var(--color-text-primary)]"
                   >
-                    <Settings size={15} style={{ color: "var(--color-text-tertiary)" }} />
-                    Settings
+                    <Settings size={14} className="text-[var(--color-text-tertiary)] group-hover:text-[var(--color-emerald-600)] transition-colors" />
+                    Settings Centre
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="w-full flex items-center gap-2.5 px-2.5 mx-1.5 py-1.5 my-0.5 rounded-[var(--radius-md)] text-sm transition-colors duration-150 hover:bg-[var(--color-surface-2)] text-left"
-                    style={{ color: "var(--color-text-primary)" }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-md)] text-xs font-medium transition-colors duration-150 hover:bg-[var(--color-surface-2)] text-left text-[var(--color-text-primary)] cursor-pointer"
                   >
-                    <LogOut size={15} style={{ color: "var(--color-text-tertiary)" }} />
+                    <LogOut size={14} className="text-[var(--color-text-tertiary)] group-hover:text-[var(--color-coral-500)] transition-colors" />
                     Sign out
                   </button>
                 </div>

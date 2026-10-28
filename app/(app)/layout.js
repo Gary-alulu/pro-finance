@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import AppShell from "@/components/layout/AppShell";
+import { getUserSettings } from "@/lib/settings/server";
 
 export default async function AppLayout({ children }) {
   const session = await auth();
@@ -15,8 +16,10 @@ export default async function AppLayout({ children }) {
     redirect("/login");
   }
 
+  const account = await getUserSettings(session.user.id);
+
   return (
-    <AppShell user={session.user}>
+    <AppShell user={session.user} settings={account?.settings}>
       {children}
     </AppShell>
   );

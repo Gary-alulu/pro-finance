@@ -14,6 +14,7 @@ import {
   getRecentTransactions,
   getAccountability,
 } from "@/lib/data/dashboard";
+import { getUserSettings } from "@/lib/settings/server";
 
 export const metadata = { title: "Overview" };
 
@@ -21,14 +22,18 @@ async function OverviewData({ user }) {
   const userId = user?.id;
   if (!userId) return <OverviewClient user={user} />;
 
-  const [summary, attention, snapshots, allocation, transactions, openItems] = await Promise.all([
-    getNetWorthSummary(userId),
-    getAccountability(userId, { status: "open", limit: 1 }),
-    getNetWorthSnapshots(userId),
-    getAssetAllocation(userId),
-    getRecentTransactions(userId, 8),
-    getAccountability(userId, { status: "open", limit: 6 }),
-  ]);
+  const [summary, attention, snapshots, allocation, transactions, openItems, account] =
+    await Promise.all([
+      getNetWorthSummary(userId, user?.preferredCurrency),
+      getAccountability(userId, { status: "open", limit: 1 }),
+      getNetWorthSnapshots(userId),
+      getAssetAllocation(userId),
+      getRecentTransactions(userId, 8),
+      getAccountability(userId, { status: "open", limit: 6 }),
+      getUserSettings(userId),
+    ]);
+
+  const settings = account?.settings;
 
   return (
     <OverviewClient
@@ -39,6 +44,11 @@ async function OverviewData({ user }) {
       initialAllocation={allocation}
       initialTransactions={transactions}
       initialAccountability={openItems.items}
+      initialHideValues={Boolean(
+        settings?.financial?.hideBalancesByDefault ||
+          settings?.security?.hideSensitiveValues
+      )}
+      dashboardLayout={settings?.appearance?.dashboardLayout || "balanced"}
     />
   );
 }

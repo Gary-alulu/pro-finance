@@ -10,6 +10,7 @@ import Asset from "@/lib/db/models/Asset";
 import Liability from "@/lib/db/models/Liability";
 import InvestmentHolding from "@/lib/db/models/InvestmentHolding";
 import ExchangeRate from "@/lib/db/models/ExchangeRate";
+import User from "@/lib/db/models/User";
 import { requireUserId, withErrorHandling } from "@/lib/auth/session";
 import { recordedNetWorth, unrealizedProfitLoss } from "@/lib/finance/calculations";
 import { DEFAULT_CURRENCY } from "@/lib/finance/currency";
@@ -22,12 +23,18 @@ async function handler(request) {
   const { searchParams } = new URL(request.url);
   const asOfParam = searchParams.get("asOf");
 
-  const [assets, liabilities, investments, rateDocs] = await Promise.all([
+  const [assets, liabilities, investments, rateDocs, user] = await Promise.all([
     Asset.find({ ownerId: userId, status: "active" }).select("-valuationHistory").lean(),
     Liability.find({ ownerId: userId, status: "active" }).lean(),
     InvestmentHolding.find({ ownerId: userId, status: "active" }).select("-priceHistory").lean(),
     ExchangeRate.find({ ownerId: userId }).lean(),
+    User.findById(userId).select("preferredCurrency settings").lean(),
   ]);
+
+  const reportingCurrency =
+    user?.settings?.financial?.reportingCurrency ||
+    user?.preferredCurrency ||
+    DEFAULT_CURRENCY;
 
   const rates = rateDocs.map((r) => ({
     from: r.from,
@@ -58,7 +65,7 @@ async function handler(request) {
       costBasis: h.costBasis?.totalCost?.toString() ?? null,
     })),
     rates,
-    reportingCurrency: DEFAULT_CURRENCY,
+    reportingCurrency,
     atDate: asOfParam || null,
   });
 

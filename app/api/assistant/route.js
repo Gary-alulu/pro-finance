@@ -12,6 +12,7 @@ import { requireUserId, withErrorHandling, validationError } from "@/lib/auth/se
 import { assistantQuerySchema } from "@/lib/validations/schemas";
 import { readJsonBody } from "@/lib/security/sanitize";
 import { answerQuestion } from "@/lib/ai/assistant";
+import { mergeSettings } from "@/lib/settings/defaults";
 
 async function postHandler(request) {
   const userId = await requireUserId();
@@ -19,8 +20,18 @@ async function postHandler(request) {
   const result = assistantQuerySchema.safeParse(body);
   if (!result.success) return validationError(result);
   await connectDB();
-  const [user, assets, liabilities, investments, transactions, documents, snapshots] = await Promise.all([
-    User.findById(userId).lean(),
+  const user = await User.findById(userId).lean();
+  const ai = mergeSettings(user?.settings, {
+    preferredCurrency: user?.preferredCurrency,
+  }).ai;
+  if (!ai.assistantEnabled) {
+    return NextResponse.json(
+      { error: "The AI assistant is disabled. Enable it in Settings → AI & Automation." },
+      { status: 403 }
+    );
+  }
+
+  const [assets, liabilities, investments, transactions, documents, snapshots] = await Promise.all([
     Asset.find({ ownerId: userId }).lean(),
     Liability.find({ ownerId: userId }).lean(),
     InvestmentHolding.find({ ownerId: userId }).lean(),
