@@ -2,6 +2,7 @@
 // components/ui/EmptyState.js
 // Illustrated empty state for lists, charts, and data-free sections.
 
+import { isValidElement } from "react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
 
@@ -28,10 +29,14 @@ export default function EmptyState({
             background: "var(--color-surface-2)",
           }}
         >
-          <Icon
-            size={compact ? 20 : 26}
-            style={{ color: "var(--color-text-tertiary)" }}
-          />
+          {isValidElement(Icon) ? (
+            Icon
+          ) : (
+            <Icon
+              size={compact ? 20 : 26}
+              style={{ color: "var(--color-text-tertiary)" }}
+            />
+          )}
         </div>
       )}
 

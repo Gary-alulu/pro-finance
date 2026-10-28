@@ -535,7 +535,7 @@ export default function CommandCentreClient({ user }) {
                     ? "Your monitored records are clean — no issues detected."
                     : "No alerts match the selected filter."
                 }
-                icon={<CheckCircle2 size={32} style={{ color: "#10b981" }} />}
+                icon={CheckCircle2}
               />
             ) : (
               <AnimatePresence mode="popLayout">
