@@ -20,6 +20,7 @@ import {
   TrendingUp,
   ArrowLeftRight,
   FileText,
+  ReceiptText,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "@/components/providers/ThemeProvider";
@@ -31,6 +32,9 @@ const PAGE_TITLES = {
   "/investments":     { title: "Investments",           breadcrumb: [] },
   "/transactions":    { title: "Transactions",          breadcrumb: [] },
   "/documents":       { title: "Documents",             breadcrumb: [] },
+  "/invoices":        { title: "Invoices",              breadcrumb: [] },
+  "/invoices/new":    { title: "New invoice",           breadcrumb: [] },
+  "/invoices/settings": { title: "Invoice settings",    breadcrumb: [] },
   "/reports":         { title: "Reports",               breadcrumb: [] },
   "/accountability":  { title: "Accountability",        breadcrumb: [] },
   "/settings":        { title: "Settings",              breadcrumb: [] },
@@ -42,6 +46,7 @@ const QUICK_CREATE_ITEMS = [
   { href: "/investments?new=1",      label: "New investment", icon: TrendingUp },
   { href: "/transactions?new=1",     label: "New transaction", icon: ArrowLeftRight },
   { href: "/documents?new=1",        label: "Upload document", icon: FileText },
+  { href: "/invoices/new",           label: "New invoice",   icon: ReceiptText },
 ];
 
 function getPageInfo(pathname) {

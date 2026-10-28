@@ -12,6 +12,7 @@ import {
   TrendingUp,
   ArrowLeftRight,
   FileText,
+  ReceiptText,
   BarChart3,
   ShieldCheck,
   Settings,
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { href: "/investments",    label: "Investments",       icon: TrendingUp },
   { href: "/transactions",   label: "Transactions",      icon: ArrowLeftRight },
   { href: "/documents",      label: "Documents",         icon: FileText },
+  { href: "/invoices",       label: "Invoices",          icon: ReceiptText },
   { href: "/reports",        label: "Reports",           icon: BarChart3 },
   { href: "/accountability", label: "Accountability",    icon: ShieldCheck },
 ];

@@ -15,6 +15,7 @@ import {
   TrendingUp,
   ArrowLeftRight,
   FileText,
+  ReceiptText,
   BarChart3,
   ShieldCheck,
   Settings,
@@ -32,6 +33,7 @@ const NAV_COMMANDS = [
   { id: "nav-investments", label: "Go to Investments", section: "Navigation", href: "/investments", icon: TrendingUp },
   { id: "nav-transactions", label: "Go to Transactions", section: "Navigation", href: "/transactions", icon: ArrowLeftRight },
   { id: "nav-documents", label: "Go to Documents", section: "Navigation", href: "/documents", icon: FileText },
+  { id: "nav-invoices", label: "Go to Invoices", section: "Navigation", href: "/invoices", icon: ReceiptText },
   { id: "nav-reports", label: "Go to Reports", section: "Navigation", href: "/reports", icon: BarChart3 },
   { id: "nav-accountability", label: "Go to Accountability", section: "Navigation", href: "/accountability", icon: ShieldCheck },
   { id: "nav-settings", label: "Go to Settings", section: "Navigation", href: "/settings", icon: Settings },
@@ -43,6 +45,7 @@ const ACTION_COMMANDS = [
   { id: "act-investment", label: "Add investment", section: "Quick actions", href: "/investments?new=1", icon: Plus },
   { id: "act-transaction", label: "Add transaction", section: "Quick actions", href: "/transactions?new=1", icon: Plus },
   { id: "act-document", label: "Upload document", section: "Quick actions", href: "/documents?new=1", icon: Plus },
+  { id: "act-invoice", label: "New invoice", section: "Quick actions", href: "/invoices/new", icon: Plus },
 ];
 
 export default function CommandPalette({ open, onClose }) {

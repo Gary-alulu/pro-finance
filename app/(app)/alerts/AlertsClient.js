@@ -1,6 +1,6 @@
 "use client";
 // app/(app)/alerts/AlertsClient.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Bell, AlertTriangle } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -10,8 +10,7 @@ export default function AlertsClient() {
   const [loading, setLoading] = useState(true);
   const [info, setInfo] = useState(null);
 
-  const fetchAlerts = async () => {
-    setLoading(true);
+  const fetchAlerts = useCallback(async () => {
     try {
       const res = await fetch("/api/alerts/context-aware");
       if (res.ok) {
@@ -22,11 +21,16 @@ export default function AlertsClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchAlerts();
-  }, []);
+  }, [fetchAlerts]);
+
+  const refresh = () => {
+    setLoading(true);
+    fetchAlerts();
+  };
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-4xl mx-auto">
@@ -39,7 +43,7 @@ export default function AlertsClient() {
             Alerts based on saved records, user-defined thresholds and transparent rules.
           </p>
         </div>
-        <Button onClick={fetchAlerts} loading={loading}>Refresh</Button>
+        <Button onClick={refresh} loading={loading}>Refresh</Button>
       </div>
 
       {info && <p className="text-xs text-[var(--color-text-tertiary)]">{info.note}</p>}
