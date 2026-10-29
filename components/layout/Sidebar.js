@@ -16,6 +16,7 @@ import {
   ReceiptText,
   BarChart3,
   ShieldCheck,
+  Compass,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -27,6 +28,7 @@ import { signOut } from "next-auth/react";
 const NAV_ITEMS = [
   { href: "/overview",         label: "Overview",            icon: LayoutDashboard },
   { href: "/command-centre",   label: "Command Centre",      icon: Activity, badge: "New" },
+  { href: "/simulator",        label: "Wealth Simulator",    icon: Compass,  badge: "New" },
   { href: "/map",              label: "Financial Map",       icon: Network },
   { href: "/assets",           label: "Assets & Liabilities",icon: Landmark },
   { href: "/investments",      label: "Investments",         icon: TrendingUp },
