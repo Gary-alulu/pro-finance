@@ -38,6 +38,11 @@ async function getHandler(request, { params }) {
       id: liability._id.toString(),
       principalAmount: liability.principalAmount ? liability.principalAmount.toString() : null,
       interestRate: liability.interestRate ? liability.interestRate.toString() : null,
+      interestType: liability.interestType || "fixed",
+      repaymentFrequency: liability.repaymentFrequency || "monthly",
+      minimumRepayment: liability.minimumRepayment ? liability.minimumRepayment.toString() : null,
+      secured: Boolean(liability.secured || liability.linkedAssetId),
+      settledAt: liability.settledAt,
       currentBalance: liability.currentBalance
         ? {
             ...liability.currentBalance,
@@ -84,17 +89,26 @@ async function patchHandler(request, { params }) {
   if (data.currency !== undefined) existing.currency = data.currency;
   if (data.lender !== undefined) existing.lender = data.lender;
   if (data.status !== undefined) existing.status = data.status;
+  if (data.interestType !== undefined) existing.interestType = data.interestType;
+  if (data.repaymentFrequency !== undefined) existing.repaymentFrequency = data.repaymentFrequency;
+  if (data.secured !== undefined) existing.secured = data.secured;
   if (data.notes !== undefined) existing.notes = data.notes;
 
   if (data.principalAmount !== undefined) {
     existing.principalAmount = data.principalAmount
-      ? mongoose.Types.Decimal128.fromString(data.principalAmount)
+      ? mongoose.Types.Decimal128.fromString(data.principalAmount.toString())
+      : null;
+  }
+
+  if (data.minimumRepayment !== undefined) {
+    existing.minimumRepayment = data.minimumRepayment
+      ? mongoose.Types.Decimal128.fromString(data.minimumRepayment.toString())
       : null;
   }
 
   if (data.interestRate !== undefined) {
     existing.interestRate = data.interestRate
-      ? mongoose.Types.Decimal128.fromString(data.interestRate)
+      ? mongoose.Types.Decimal128.fromString(data.interestRate.toString())
       : null;
   }
 
@@ -106,10 +120,15 @@ async function patchHandler(request, { params }) {
     existing.maturityDate = data.maturityDate ? new Date(data.maturityDate) : null;
   }
 
+  if (data.settledAt !== undefined) {
+    existing.settledAt = data.settledAt ? new Date(data.settledAt) : null;
+  }
+
   if (data.linkedAssetId !== undefined) {
     // M-5: linked records must be owned by the current user
     if (data.linkedAssetId) {
       await assertOwnedRef(Asset, data.linkedAssetId, userId);
+      existing.secured = true;
     }
     existing.linkedAssetId = data.linkedAssetId
       ? new mongoose.Types.ObjectId(data.linkedAssetId)

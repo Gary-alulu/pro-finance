@@ -96,6 +96,31 @@ async function patchHandler(request, { params }) {
   if (data.description !== undefined) existing.description = data.description;
   if (data.currency !== undefined) existing.currency = data.currency;
   if (data.status !== undefined) existing.status = data.status;
+  if (data.ownershipType !== undefined) existing.ownershipType = data.ownershipType;
+  if (data.ownershipPercentage !== undefined) {
+    existing.ownershipPercentage = mongoose.Types.Decimal128.fromString(data.ownershipPercentage.toString());
+  }
+  if (data.acquisitionDate !== undefined) {
+    existing.acquisitionDate = data.acquisitionDate ? new Date(data.acquisitionDate) : undefined;
+  }
+  if (data.acquisitionCost !== undefined) {
+    existing.acquisitionCost = data.acquisitionCost
+      ? mongoose.Types.Decimal128.fromString(data.acquisitionCost.toString())
+      : undefined;
+  }
+  if (data.valuationMethod !== undefined) existing.valuationMethod = data.valuationMethod;
+  if (data.location !== undefined) existing.location = data.location;
+  if (data.disposalDate !== undefined) {
+    existing.disposalDate = data.disposalDate ? new Date(data.disposalDate) : undefined;
+  }
+  if (data.disposalProceeds !== undefined) {
+    existing.disposalProceeds = data.disposalProceeds
+      ? mongoose.Types.Decimal128.fromString(data.disposalProceeds.toString())
+      : undefined;
+  }
+  if (data.metadata !== undefined) {
+    existing.metadata = { ...(existing.metadata || {}), ...data.metadata };
+  }
   if (data.tags !== undefined) existing.tags = data.tags;
   if (data.notes !== undefined) existing.notes = data.notes;
 

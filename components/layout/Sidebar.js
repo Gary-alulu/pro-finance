@@ -32,7 +32,7 @@ const NAV_ITEMS = [
   { href: "/simulator",        label: "Wealth Simulator",    icon: Compass,  badge: "New" },
   { href: "/journal",          label: "Command Journal",     icon: BookOpen, badge: "New" },
   { href: "/map",              label: "Financial Map",       icon: Network },
-  { href: "/assets",           label: "Assets & Liabilities",icon: Landmark },
+  { href: "/assets-liabilities",label: "Assets & Liabilities",icon: Landmark },
   { href: "/investments",      label: "Investments",         icon: TrendingUp },
   { href: "/transactions",     label: "Transactions",        icon: ArrowLeftRight },
   { href: "/documents",        label: "Documents",           icon: FileText },
@@ -52,6 +52,9 @@ export default function Sidebar({ collapsed, onToggle, user, isMobile = false })
 
   function isActive(href) {
     if (href === "/overview") return pathname === "/overview" || pathname === "/";
+    if (href === "/assets-liabilities") {
+      return pathname.startsWith("/assets") || pathname.startsWith("/liabilities") || pathname.startsWith("/asset-liability");
+    }
     return pathname.startsWith(href);
   }
 

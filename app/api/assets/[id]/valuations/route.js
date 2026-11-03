@@ -68,7 +68,11 @@ async function postHandler(request, { params }) {
     currency: data.currency || asset.currency,
     asOf: new Date(data.asOf),
     source: data.source || "manual",
-    note: data.note,
+    status: data.status || "approved",
+    confidence: data.confidence || "recorded",
+    method: data.method || asset.valuationMethod || "owner_estimate",
+    valuationDate: data.valuationDate ? new Date(data.valuationDate) : new Date(data.asOf),
+    documentId: data.documentId ? new mongoose.Types.ObjectId(data.documentId) : undefined,
     approvedBy: new mongoose.Types.ObjectId(userId),
     approvedAt: new Date(),
   });
@@ -79,7 +83,13 @@ async function postHandler(request, { params }) {
     "asset_valuation",
     valuationRecord._id.toString(),
     null,
-    { amount: data.amount, currency: data.currency || asset.currency, asOf: data.asOf, assetId: id },
+    {
+      amount: data.amount,
+      currency: data.currency || asset.currency,
+      asOf: data.asOf,
+      method: data.method,
+      assetId: id,
+    },
     `Recorded valuation for "${asset.name}"`,
     requestMeta(request)
   );
@@ -92,8 +102,57 @@ async function postHandler(request, { params }) {
     valuation: {
       ...valuationEntry,
       amount: data.amount,
+      method: valuationRecord.method,
+      confidence: valuationRecord.confidence,
+      status: valuationRecord.status,
     },
   });
 }
 
+async function getHandler(request, { params }) {
+  const userId = await requireUserId();
+  const { id } = await params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: "Invalid asset ID" }, { status: 400 });
+  }
+
+  await connectDB();
+  const asset = await Asset.findById(id);
+  if (!asset) {
+    return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+  }
+
+  assertOwnership(asset.ownerId, userId);
+
+  const valuations = await AssetValuation.find({ ownerId: userId, assetId: id })
+    .sort({ asOf: -1, createdAt: -1 })
+    .populate("documentId", "filename mimeType originalFilename")
+    .lean();
+
+  const formatted = valuations.map((v) => ({
+    id: v._id.toString(),
+    amount: v.amount ? v.amount.toString() : "0",
+    currency: v.currency || asset.currency || "KES",
+    asOf: v.asOf,
+    valuationDate: v.valuationDate,
+    source: v.source,
+    method: v.method || "owner_estimate",
+    confidence: v.confidence || "recorded",
+    status: v.status || "approved",
+    note: v.note,
+    document: v.documentId
+      ? {
+          id: v.documentId._id.toString(),
+          filename: v.documentId.filename || v.documentId.originalFilename,
+        }
+      : null,
+    createdAt: v.createdAt,
+  }));
+
+  return NextResponse.json({ valuations: formatted, assetName: asset.name });
+}
+
+export const GET = withErrorHandling(getHandler);
 export const POST = withErrorHandling(postHandler);
+

@@ -76,13 +76,28 @@ async function postHandler(request) {
     description: data.description,
     currency: data.currency,
     status: data.status,
+    ownershipType: data.ownershipType || "sole",
+    ownershipPercentage: data.ownershipPercentage
+      ? mongoose.Types.Decimal128.fromString(data.ownershipPercentage.toString())
+      : mongoose.Types.Decimal128.fromString("100"),
+    acquisitionDate: data.acquisitionDate ? new Date(data.acquisitionDate) : undefined,
+    acquisitionCost: data.acquisitionCost
+      ? mongoose.Types.Decimal128.fromString(data.acquisitionCost.toString())
+      : undefined,
+    valuationMethod: data.valuationMethod || "owner_estimate",
+    location: data.location,
+    disposalDate: data.disposalDate ? new Date(data.disposalDate) : undefined,
+    disposalProceeds: data.disposalProceeds
+      ? mongoose.Types.Decimal128.fromString(data.disposalProceeds.toString())
+      : undefined,
+    metadata: data.metadata || {},
     tags: data.tags,
     notes: data.notes,
   };
 
   if (data.currentValue) {
     assetData.currentValue = {
-      amount: mongoose.Types.Decimal128.fromString(data.currentValue.amount),
+      amount: mongoose.Types.Decimal128.fromString(data.currentValue.amount.toString()),
       asOf: new Date(data.currentValue.asOf),
       source: data.currentValue.source,
       approvedBy: new mongoose.Types.ObjectId(userId),
@@ -91,7 +106,7 @@ async function postHandler(request) {
     // Also add to valuation history
     assetData.valuationHistory = [
       {
-        amount: mongoose.Types.Decimal128.fromString(data.currentValue.amount),
+        amount: mongoose.Types.Decimal128.fromString(data.currentValue.amount.toString()),
         currency: data.currency,
         asOf: new Date(data.currentValue.asOf),
         source: data.currentValue.source,
@@ -100,6 +115,26 @@ async function postHandler(request) {
   }
 
   const asset = await Asset.create(assetData);
+
+  // If initial valuation exists, create initial AssetValuation standalone record
+  if (data.currentValue) {
+    const AssetValuation = (await import("@/lib/db/models/AssetValuation")).default;
+    await AssetValuation.create({
+      ownerId: new mongoose.Types.ObjectId(userId),
+      assetId: asset._id,
+      amount: mongoose.Types.Decimal128.fromString(data.currentValue.amount.toString()),
+      currency: data.currency,
+      asOf: new Date(data.currentValue.asOf),
+      valuationDate: new Date(data.currentValue.asOf),
+      source: data.currentValue.source || "manual",
+      method: data.valuationMethod || "owner_estimate",
+      confidence: "recorded",
+      status: "approved",
+      note: "Initial asset valuation on creation",
+      approvedBy: new mongoose.Types.ObjectId(userId),
+      approvedAt: new Date(),
+    });
+  }
 
   await logAudit(
     userId,

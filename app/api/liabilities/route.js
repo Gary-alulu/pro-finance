@@ -60,6 +60,11 @@ async function getHandler(request) {
       id: l._id.toString(),
       principalAmount: l.principalAmount ? l.principalAmount.toString() : null,
       interestRate: l.interestRate ? l.interestRate.toString() : null,
+      interestType: l.interestType || "fixed",
+      repaymentFrequency: l.repaymentFrequency || "monthly",
+      minimumRepayment: l.minimumRepayment ? l.minimumRepayment.toString() : null,
+      secured: Boolean(l.secured || l.linkedAssetId),
+      settledAt: l.settledAt,
       currentBalance: l.currentBalance
         ? {
             ...l.currentBalance,
@@ -99,15 +104,22 @@ async function postHandler(request) {
     currency: data.currency,
     lender: data.lender,
     status: data.status,
+    interestType: data.interestType || "fixed",
+    repaymentFrequency: data.repaymentFrequency || "monthly",
+    secured: Boolean(data.secured || data.linkedAssetId),
     notes: data.notes,
   };
 
   if (data.principalAmount) {
-    liabilityData.principalAmount = mongoose.Types.Decimal128.fromString(data.principalAmount);
+    liabilityData.principalAmount = mongoose.Types.Decimal128.fromString(data.principalAmount.toString());
+  }
+
+  if (data.minimumRepayment) {
+    liabilityData.minimumRepayment = mongoose.Types.Decimal128.fromString(data.minimumRepayment.toString());
   }
 
   if (data.interestRate) {
-    liabilityData.interestRate = mongoose.Types.Decimal128.fromString(data.interestRate);
+    liabilityData.interestRate = mongoose.Types.Decimal128.fromString(data.interestRate.toString());
   }
 
   if (data.startDate) {
@@ -118,15 +130,20 @@ async function postHandler(request) {
     liabilityData.maturityDate = new Date(data.maturityDate);
   }
 
+  if (data.settledAt) {
+    liabilityData.settledAt = new Date(data.settledAt);
+  }
+
   if (data.linkedAssetId) {
     // M-5: linked records must be owned by the current user
     await assertOwnedRef(Asset, data.linkedAssetId, userId);
     liabilityData.linkedAssetId = new mongoose.Types.ObjectId(data.linkedAssetId);
+    liabilityData.secured = true;
   }
 
   if (data.currentBalance) {
     liabilityData.currentBalance = {
-      amount: mongoose.Types.Decimal128.fromString(data.currentBalance.amount),
+      amount: mongoose.Types.Decimal128.fromString(data.currentBalance.amount.toString()),
       asOf: new Date(data.currentBalance.asOf),
       source: data.currentBalance.source || "manual",
     };
