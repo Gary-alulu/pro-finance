@@ -3,6 +3,7 @@
 // Portfolio manager for equities, bonds, REITs, funds, and alternative holdings.
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import {
@@ -21,6 +22,7 @@ import {
   AlertTriangle,
   History,
   Layers,
+  Calculator,
 } from "lucide-react";
 import { formatCurrency, sumAmounts, formatNumber } from "@/lib/finance/currency";
 import { Decimal } from "decimal.js";
@@ -282,30 +284,38 @@ export default function InvestmentsClient({ user, focusId = null, newRecord = fa
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          icon={Plus}
-          onClick={() => {
-            setEditingHolding(null);
-            setForm({
-              name: "",
-              type: "listed_equity",
-              ticker: "",
-              exchange: "NSE",
-              currency: user?.preferredCurrency || "KES",
-              units: "",
-              costBasisAmount: "",
-              costBasisDate: new Date().toISOString().split("T")[0],
-              currentPrice: "",
-              priceDate: new Date().toISOString().split("T")[0],
-              priceSource: "manual",
-              notes: "",
-            });
-            setIsHoldingModalOpen(true);
-          }}
-        >
-          Add Investment
-        </Button>
+        <div className="flex items-center gap-2.5">
+          <Link href="/calculator?category=investment">
+            <Button variant="outline" icon={Calculator}>
+              Calculator
+            </Button>
+          </Link>
+
+          <Button
+            variant="primary"
+            icon={Plus}
+            onClick={() => {
+              setEditingHolding(null);
+              setForm({
+                name: "",
+                type: "listed_equity",
+                ticker: "",
+                exchange: "NSE",
+                currency: user?.preferredCurrency || "KES",
+                units: "",
+                costBasisAmount: "",
+                costBasisDate: new Date().toISOString().split("T")[0],
+                currentPrice: "",
+                priceDate: new Date().toISOString().split("T")[0],
+                priceSource: "manual",
+                notes: "",
+              });
+              setIsHoldingModalOpen(true);
+            }}
+          >
+            Add Investment
+          </Button>
+        </div>
       </div>
 
       {/* ── KPI Cards ───────────────────────────────────────────────────── */}

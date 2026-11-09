@@ -23,12 +23,14 @@ import {
   ChevronRight,
   LogOut,
   X,
+  Calculator,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 const NAV_ITEMS = [
   { href: "/overview",         label: "Overview",            icon: LayoutDashboard },
   { href: "/command-centre",   label: "Command Centre",      icon: Activity, badge: "New" },
+  { href: "/calculator",       label: "Calculator",          icon: Calculator, badge: "Engine" },
   { href: "/simulator",        label: "Wealth Simulator",    icon: Compass,  badge: "New" },
   { href: "/journal",          label: "Command Journal",     icon: BookOpen, badge: "New" },
   { href: "/map",              label: "Financial Map",       icon: Network },

@@ -21,10 +21,16 @@ import {
   Settings,
   Plus,
   CornerDownLeft,
+  Calculator,
+  Compass,
+  BookOpen,
 } from "lucide-react";
 
 const NAV_COMMANDS = [
   { id: "nav-overview", label: "Go to Overview", section: "Navigation", href: "/overview", icon: LayoutDashboard },
+  { id: "nav-calculator", label: "Go to Financial Calculator", section: "Navigation", href: "/calculator", icon: Calculator },
+  { id: "nav-simulator", label: "Go to Wealth Simulator", section: "Navigation", href: "/simulator", icon: Compass },
+  { id: "nav-journal", label: "Go to Command Journal", section: "Navigation", href: "/journal", icon: BookOpen },
   { id: "nav-map", label: "Go to Financial Map", section: "Navigation", href: "/map", icon: Network },
   { id: "nav-assets", label: "Go to Assets & Liabilities", section: "Navigation", href: "/assets", icon: Landmark },
   { id: "nav-investments", label: "Go to Investments", section: "Navigation", href: "/investments", icon: TrendingUp },
@@ -37,6 +43,20 @@ const NAV_COMMANDS = [
 ];
 
 const ACTION_COMMANDS = [
+  {
+    id: "act-quick-calc",
+    label: "Open Quick Calculator (Alt+C)",
+    section: "Quick actions",
+    run: () => {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("open-quick-calculator"));
+      }
+    },
+    icon: Calculator,
+  },
+  { id: "act-loan-calc", label: "Calculate Loan Repayment", section: "Calculators", href: "/calculator?category=loan", icon: Calculator },
+  { id: "act-savings-calc", label: "Calculate Savings Goal", section: "Calculators", href: "/calculator?category=savings", icon: Calculator },
+  { id: "act-currency-calc", label: "Currency Converter", section: "Calculators", href: "/calculator?category=currency", icon: Calculator },
   { id: "act-asset", label: "Add asset", section: "Quick actions", href: "/assets?new=asset", icon: Plus },
   { id: "act-liability", label: "Add liability", section: "Quick actions", href: "/assets?new=liability", icon: Plus },
   { id: "act-investment", label: "Add investment", section: "Quick actions", href: "/investments?new=1", icon: Plus },

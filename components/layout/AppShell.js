@@ -19,6 +19,11 @@ const CommandPalette = dynamic(() => import("@/components/ui/CommandPalette"), {
   ssr: false,
 });
 
+const GlobalQuickCalculatorModal = dynamic(
+  () => import("@/components/calculator/GlobalQuickCalculatorModal"),
+  { ssr: false }
+);
+
 export default function AppShell({ user, settings, children }) {
   const serverCollapsed = Boolean(settings?.appearance?.sidebarCollapsed);
   // A local override keeps the toggle instant while the server value remains
@@ -158,6 +163,9 @@ export default function AppShell({ user, settings, children }) {
           {paletteMounted && (
             <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
           )}
+
+          {/* Global quick calculator modal (Alt+C) */}
+          <GlobalQuickCalculatorModal />
         </div>
         </ToastProvider>
       </SettingsProvider>

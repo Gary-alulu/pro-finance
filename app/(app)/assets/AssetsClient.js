@@ -3,6 +3,7 @@
 // Complete Assets & Liabilities management studio.
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -26,6 +27,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Info,
+  Calculator,
 } from "lucide-react";
 import { formatCurrency, sumAmounts, calculateNetWorth } from "@/lib/finance/currency";
 import Button from "@/components/ui/Button";
@@ -400,6 +402,12 @@ export default function AssetsClient({ user, initialTab = "assets", focusId = nu
         </div>
 
         <div className="flex items-center gap-2.5">
+          <Link href="/calculator?category=depreciation">
+            <Button variant="outline" icon={Calculator}>
+              Calculator
+            </Button>
+          </Link>
+
           <Button
             variant="outline"
             icon={TrendingDown}
