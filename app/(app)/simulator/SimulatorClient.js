@@ -3,13 +3,27 @@
 // Wealth Simulator & Future Self — Main interactive client.
 
 import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { ShieldCheck, Compass } from "lucide-react";
 import { projectWealth, DEFAULT_ASSUMPTIONS } from "@/lib/simulator/engine";
-import ProjectionChart from "@/components/simulator/ProjectionChart";
 import AssumptionControls from "@/components/simulator/AssumptionControls";
 import SimulatorMetrics from "@/components/simulator/SimulatorMetrics";
 import SnapshotCard from "@/components/simulator/SnapshotCard";
 import ScenarioSelector from "@/components/simulator/ScenarioSelector";
+
+// Recharts is heavy and the chart is not required for first paint.
+const ProjectionChart = dynamic(
+  () => import("@/components/simulator/ProjectionChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-xl">
+        <div className="h-5 w-52 rounded bg-[var(--color-surface-3)] animate-pulse" />
+        <div className="mt-6 h-80 w-full rounded-xl bg-[var(--color-surface-2)] animate-pulse" />
+      </div>
+    ),
+  }
+);
 
 export default function SimulatorClient({ initialUser }) {
   const [loading, setLoading] = useState(true);
@@ -88,7 +102,9 @@ export default function SimulatorClient({ initialUser }) {
 
   // Save current scenario changes
   async function handleSaveScenario(patch = {}) {
-    if (!activeScenarioId) return;
+    if (!activeScenarioId) {
+      return handleCreateScenario(patch);
+    }
     try {
       setSaving(true);
       const payload = {
@@ -118,17 +134,17 @@ export default function SimulatorClient({ initialUser }) {
   }
 
   // Create new scenario
-  async function handleCreateScenario() {
+  async function handleCreateScenario(overrides = {}) {
     try {
       setSaving(true);
-      const name = `Scenario ${scenarios.length + 1}`;
+      const name = overrides.name || `Scenario ${scenarios.length + 1}`;
       const res = await fetch("/api/simulator/scenarios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          timeHorizonYears,
-          assumptions,
+          timeHorizonYears: overrides.timeHorizonYears || timeHorizonYears,
+          assumptions: overrides.assumptions || assumptions,
           baseSnapshot: snapshot,
         }),
       });
@@ -136,8 +152,12 @@ export default function SimulatorClient({ initialUser }) {
       if (res.ok) {
         const data = await res.json();
         const created = data.scenario;
-        setScenarios((prev) => [created, ...prev]);
-        setActiveScenarioId(created.id || created._id);
+        const normalized = {
+          ...created,
+          id: created.id || created._id,
+        };
+        setScenarios((prev) => [normalized, ...prev]);
+        setActiveScenarioId(normalized.id);
         setIsDirty(false);
       }
     } catch (e) {
@@ -216,7 +236,7 @@ export default function SimulatorClient({ initialUser }) {
   const currency = snapshot?.currency || "KES";
 
   return (
-    <div className="space-y-6 pb-12 max-w-7xl mx-auto">
+    <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-12 space-y-6 max-w-7xl mx-auto">
       {/* ── Page Header ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>

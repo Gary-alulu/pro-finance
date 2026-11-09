@@ -53,6 +53,8 @@ const nextConfig = {
     // until they are actually requested, slashing first-visit compile time.
     turbopackLazyDynamicImports: true,
     turbopackLazyDynamicImportsSSR: true,
+    // Tree-shake barrel imports so only the icons/modules used ship to the client.
+    optimizePackageImports: ["lucide-react", "date-fns", "recharts"],
   },
   // Keep compiled dev pages/APIs resident longer so hopping between routes
   // does not re-trigger a cold compile.

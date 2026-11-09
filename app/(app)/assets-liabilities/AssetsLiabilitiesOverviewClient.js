@@ -182,23 +182,23 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
   if (loading) {
     return (
       <div className="p-6 max-w-7xl mx-auto space-y-6">
-        <div className="h-10 w-72 bg-slate-800/60 rounded-lg animate-pulse" />
+        <div className="h-10 w-72 bg-[var(--color-surface-2)] rounded-lg animate-pulse" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="h-32 bg-slate-800/40 rounded-xl animate-pulse" />
+            <div key={i} className="h-32 bg-[var(--color-surface-2)] rounded-xl animate-pulse" />
           ))}
         </div>
-        <div className="h-96 bg-slate-800/30 rounded-xl animate-pulse" />
+        <div className="h-96 bg-[var(--color-surface-2)]/30 rounded-xl animate-pulse" />
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="p-6 max-w-xl mx-auto my-12 text-center bg-slate-900 border border-rose-500/30 rounded-2xl p-8">
-        <AlertTriangle className="w-12 h-12 text-rose-400 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">Unable to Load Overview</h2>
-        <p className="text-slate-400 text-sm mb-6">{error || "Data is currently unavailable."}</p>
+      <div className="p-6 max-w-xl mx-auto my-12 text-center bg-[var(--color-surface)] border border-rose-500/30 rounded-2xl p-8">
+        <AlertTriangle className="w-12 h-12 text-[var(--color-negative-text)] mx-auto mb-4" />
+        <h2 className="text-xl font-bold text-[var(--color-text-primary)] mb-2">Unable to Load Overview</h2>
+        <p className="text-[var(--color-text-secondary)] text-sm mb-6">{error || "Data is currently unavailable."}</p>
         <Button onClick={loadData}>
           <RefreshCw className="w-4 h-4 mr-2" /> Retry
         </Button>
@@ -213,17 +213,17 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
       {/* Header & Quick Action Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--color-border)] pb-6">
         <div>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400">
+            <div className="p-2.5 rounded-xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-[var(--color-positive-text)]">
               <Scale className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text-primary)] tracking-tight">
                 Assets & Liabilities Hub
               </h1>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[var(--color-text-secondary)]">
                 Consolidated balance sheet, valuations, and debt management
               </p>
             </div>
@@ -238,7 +238,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
             </Button>
           </Link>
           <Link href="/liabilities/new">
-            <Button variant="secondary" size="sm" className="border-rose-500/40 text-rose-300 hover:bg-rose-500/10">
+            <Button variant="secondary" size="sm" className="border-rose-500/40 text-[var(--color-negative-text)] hover:bg-rose-500/10">
               <Plus className="w-4 h-4 mr-1.5" /> Add Debt
             </Button>
           </Link>
@@ -255,7 +255,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
               setIsRepaymentModalOpen(true);
             }}
           >
-            <Receipt className="w-4 h-4 mr-1.5 text-sky-400" /> Repay Debt
+            <Receipt className="w-4 h-4 mr-1.5 text-sky-600 dark:text-sky-400" /> Repay Debt
           </Button>
           <Button
             variant="secondary"
@@ -270,7 +270,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
               setIsReconcileModalOpen(true);
             }}
           >
-            <FileCheck2 className="w-4 h-4 mr-1.5 text-amber-400" /> Reconcile
+            <FileCheck2 className="w-4 h-4 mr-1.5 text-[var(--color-warning-text)]" /> Reconcile
           </Button>
         </div>
       </div>
@@ -279,12 +279,12 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
         <div
           className={`p-4 rounded-xl text-sm flex items-center justify-between ${
             actionMessage.type === "success"
-              ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-300"
-              : "bg-rose-500/10 border border-rose-500/30 text-rose-300"
+              ? "bg-emerald-500/10 border border-emerald-500/30 text-[var(--color-positive-text)]"
+              : "bg-rose-500/10 border border-rose-500/30 text-[var(--color-negative-text)]"
           }`}
         >
           <span>{actionMessage.text}</span>
-          <button onClick={() => setActionMessage(null)} className="text-slate-400 hover:text-white">
+          <button onClick={() => setActionMessage(null)} className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
             ✕
           </button>
         </div>
@@ -293,138 +293,138 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
       {/* 8 Primary KPI Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 1. Net Position */}
-        <div className="relative overflow-hidden rounded-2xl border border-sky-500/30 bg-gradient-to-br from-slate-900/90 via-sky-950/20 to-slate-900/90 p-5 shadow-lg">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold tracking-wider uppercase text-sky-300">
+        <div className="relative overflow-hidden rounded-2xl border border-sky-500/30 bg-gradient-to-br from-sky-50 via-white to-sky-100 dark:from-slate-900/90 dark:via-sky-950/20 dark:to-slate-900/90 p-5 shadow-lg">
+          <div className="flex items-center justify-between text-[var(--color-text-secondary)] mb-2">
+            <span className="text-xs font-semibold tracking-wider uppercase text-sky-600 dark:text-sky-400">
               Net Financial Position
             </span>
-            <Scale className="w-4 h-4 text-sky-400" />
+            <Scale className="w-4 h-4 text-sky-600 dark:text-sky-400" />
           </div>
-          <div className="text-2xl font-black text-white tracking-tight">
+          <div className="text-2xl font-black text-[var(--color-text-primary)] tracking-tight">
             {formatMoney(summary.netWorth, currency)}
           </div>
-          <div className="mt-2 text-xs text-slate-400 flex items-center justify-between">
+          <div className="mt-2 text-xs text-[var(--color-text-secondary)] flex items-center justify-between">
             <span>Assets minus Liabilities</span>
-            <span className="font-semibold text-slate-300">
+            <span className="font-semibold text-[var(--color-text-secondary)]">
               Ratio: {summary.debtToAssetRatio}% Debt
             </span>
           </div>
         </div>
 
         {/* 2. Total Assets */}
-        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-slate-900/90 via-emerald-950/20 to-slate-900/90 p-5 shadow-lg">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold tracking-wider uppercase text-emerald-300">
+        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-slate-900/90 dark:via-emerald-950/20 dark:to-slate-900/90 p-5 shadow-lg">
+          <div className="flex items-center justify-between text-[var(--color-text-secondary)] mb-2">
+            <span className="text-xs font-semibold tracking-wider uppercase text-[var(--color-positive-text)]">
               Total Assets
             </span>
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <TrendingUp className="w-4 h-4 text-[var(--color-positive-text)]" />
           </div>
-          <div className="text-2xl font-black text-emerald-400 tracking-tight">
+          <div className="text-2xl font-black text-[var(--color-positive-text)] tracking-tight">
             {formatMoney(summary.totalAssets, currency)}
           </div>
-          <div className="mt-2 text-xs text-slate-400 flex items-center justify-between">
+          <div className="mt-2 text-xs text-[var(--color-text-secondary)] flex items-center justify-between">
             <span>{summary.assetCount} registered assets</span>
-            <Link href="/assets" className="text-emerald-400 hover:underline flex items-center">
+            <Link href="/assets" className="text-[var(--color-positive-text)] hover:underline flex items-center">
               View Register <ChevronRight className="w-3 h-3 ml-0.5" />
             </Link>
           </div>
         </div>
 
         {/* 3. Total Liabilities */}
-        <div className="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-br from-slate-900/90 via-rose-950/20 to-slate-900/90 p-5 shadow-lg">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold tracking-wider uppercase text-rose-300">
+        <div className="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-50 via-white to-rose-100 dark:from-slate-900/90 dark:via-rose-950/20 dark:to-slate-900/90 p-5 shadow-lg">
+          <div className="flex items-center justify-between text-[var(--color-text-secondary)] mb-2">
+            <span className="text-xs font-semibold tracking-wider uppercase text-[var(--color-negative-text)]">
               Total Debt
             </span>
-            <TrendingDown className="w-4 h-4 text-rose-400" />
+            <TrendingDown className="w-4 h-4 text-[var(--color-negative-text)]" />
           </div>
-          <div className="text-2xl font-black text-rose-400 tracking-tight">
+          <div className="text-2xl font-black text-[var(--color-negative-text)] tracking-tight">
             {formatMoney(summary.totalLiabilities, currency)}
           </div>
-          <div className="mt-2 text-xs text-slate-400 flex items-center justify-between">
+          <div className="mt-2 text-xs text-[var(--color-text-secondary)] flex items-center justify-between">
             <span>{summary.liabilityCount} obligations</span>
-            <Link href="/liabilities" className="text-rose-400 hover:underline flex items-center">
+            <Link href="/liabilities" className="text-[var(--color-negative-text)] hover:underline flex items-center">
               View Register <ChevronRight className="w-3 h-3 ml-0.5" />
             </Link>
           </div>
         </div>
 
         {/* 4. Cash & Equivalents */}
-        <div className="relative overflow-hidden rounded-2xl border border-teal-500/20 bg-slate-900/80 p-5 shadow-md">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold tracking-wider uppercase text-teal-300">
+        <div className="relative overflow-hidden rounded-2xl border border-teal-500/20 bg-[var(--color-surface)] p-5 shadow-md">
+          <div className="flex items-center justify-between text-[var(--color-text-secondary)] mb-2">
+            <span className="text-xs font-semibold tracking-wider uppercase text-teal-600 dark:text-teal-400">
               Liquid Cash
             </span>
-            <Wallet className="w-4 h-4 text-teal-400" />
+            <Wallet className="w-4 h-4 text-teal-600 dark:text-teal-400" />
           </div>
-          <div className="text-xl font-bold text-white tracking-tight">
+          <div className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">
             {formatMoney(summary.cashEquivalentsTotal, currency)}
           </div>
-          <div className="mt-2 text-xs text-slate-400">
+          <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
             Bank & M-Pesa balances
           </div>
         </div>
 
         {/* 5. Investment Assets */}
-        <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-slate-900/80 p-5 shadow-md">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold tracking-wider uppercase text-purple-300">
+        <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-[var(--color-surface)] p-5 shadow-md">
+          <div className="flex items-center justify-between text-[var(--color-text-secondary)] mb-2">
+            <span className="text-xs font-semibold tracking-wider uppercase text-purple-600 dark:text-purple-400">
               Investments
             </span>
-            <PieChart className="w-4 h-4 text-purple-400" />
+            <PieChart className="w-4 h-4 text-purple-600 dark:text-purple-400" />
           </div>
-          <div className="text-xl font-bold text-white tracking-tight">
+          <div className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">
             {formatMoney(summary.investmentAssetsTotal, currency)}
           </div>
-          <div className="mt-2 text-xs text-slate-400">
+          <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
             Equities, bonds & funds
           </div>
         </div>
 
         {/* 6. Physical & Illiquid Assets */}
-        <div className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-slate-900/80 p-5 shadow-md">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold tracking-wider uppercase text-amber-300">
+        <div className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-[var(--color-surface)] p-5 shadow-md">
+          <div className="flex items-center justify-between text-[var(--color-text-secondary)] mb-2">
+            <span className="text-xs font-semibold tracking-wider uppercase text-[var(--color-warning-text)]">
               Fixed & Tangible
             </span>
-            <Building2 className="w-4 h-4 text-amber-400" />
+            <Building2 className="w-4 h-4 text-[var(--color-warning-text)]" />
           </div>
-          <div className="text-xl font-bold text-white tracking-tight">
+          <div className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">
             {formatMoney(summary.physicalAssetsTotal, currency)}
           </div>
-          <div className="mt-2 text-xs text-slate-400">
+          <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
             Real estate, vehicles & equipment
           </div>
         </div>
 
         {/* 7. Secured Debt */}
-        <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 bg-slate-900/80 p-5 shadow-md">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold tracking-wider uppercase text-blue-300">
+        <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 bg-[var(--color-surface)] p-5 shadow-md">
+          <div className="flex items-center justify-between text-[var(--color-text-secondary)] mb-2">
+            <span className="text-xs font-semibold tracking-wider uppercase text-blue-600 dark:text-blue-400">
               Secured Debt
             </span>
-            <ShieldCheck className="w-4 h-4 text-blue-400" />
+            <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
-          <div className="text-xl font-bold text-white tracking-tight">
+          <div className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">
             {formatMoney(summary.securedDebtTotal, currency)}
           </div>
-          <div className="mt-2 text-xs text-slate-400">
+          <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
             Asset-backed (mortgages & auto)
           </div>
         </div>
 
         {/* 8. Unsecured Debt */}
-        <div className="relative overflow-hidden rounded-2xl border border-orange-500/20 bg-slate-900/80 p-5 shadow-md">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-semibold tracking-wider uppercase text-orange-300">
+        <div className="relative overflow-hidden rounded-2xl border border-orange-500/20 bg-[var(--color-surface)] p-5 shadow-md">
+          <div className="flex items-center justify-between text-[var(--color-text-secondary)] mb-2">
+            <span className="text-xs font-semibold tracking-wider uppercase text-orange-600 dark:text-orange-400">
               Unsecured Debt
             </span>
-            <ShieldAlert className="w-4 h-4 text-orange-400" />
+            <ShieldAlert className="w-4 h-4 text-orange-600 dark:text-orange-400" />
           </div>
-          <div className="text-xl font-bold text-white tracking-tight">
+          <div className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">
             {formatMoney(summary.unsecuredDebtTotal, currency)}
           </div>
-          <div className="mt-2 text-xs text-slate-400">
+          <div className="mt-2 text-xs text-[var(--color-text-secondary)]">
             Credit cards, overdrafts & loans
           </div>
         </div>
@@ -435,30 +435,30 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
         {/* Left Column (2 Cols): Allocation & Distribution */}
         <div className="lg:col-span-2 space-y-8">
           {/* Asset Allocation Breakdown */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <PieChart className="w-5 h-5 text-emerald-400" /> Asset Allocation
+                <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+                  <PieChart className="w-5 h-5 text-[var(--color-positive-text)]" /> Asset Allocation
                 </h2>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--color-text-secondary)]">
                   Distribution of attributable wealth across asset categories
                 </p>
               </div>
-              <Link href="/assets" className="text-xs font-semibold text-emerald-400 hover:underline">
+              <Link href="/assets" className="text-xs font-semibold text-[var(--color-positive-text)] hover:underline">
                 Manage Assets →
               </Link>
             </div>
 
             {/* Liquidity Progress Bar */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs text-slate-400">
+              <div className="flex justify-between text-xs text-[var(--color-text-secondary)]">
                 <span>Liquidity Profile</span>
                 <span>
                   {liquidityBreakdown.map((l) => `${l.label}: ${l.percentage}%`).join(" · ")}
                 </span>
               </div>
-              <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden flex">
+              <div className="h-3 w-full bg-[var(--color-surface-2)] rounded-full overflow-hidden flex">
                 <div
                   style={{ width: `${liquidityBreakdown[0]?.percentage || 0}%` }}
                   className="bg-teal-400"
@@ -482,19 +482,19 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
               {assetAllocation.map((cat) => (
                 <div
                   key={cat.category}
-                  className="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/50 flex items-center justify-between"
+                  className="p-3.5 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-between"
                 >
                   <div className="space-y-0.5">
-                    <div className="text-xs font-medium text-slate-300">{cat.label}</div>
-                    <div className="text-sm font-bold text-white">
+                    <div className="text-xs font-medium text-[var(--color-text-secondary)]">{cat.label}</div>
+                    <div className="text-sm font-bold text-[var(--color-text-primary)]">
                       {formatMoney(cat.amount, currency)}
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge variant="default" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                    <Badge variant="default" className="text-xs bg-emerald-500/10 text-[var(--color-positive-text)] border-emerald-500/20">
                       {cat.percentage}%
                     </Badge>
-                    <div className="text-[10px] text-slate-400 mt-0.5">{cat.itemCount} item(s)</div>
+                    <div className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">{cat.itemCount} item(s)</div>
                   </div>
                 </div>
               ))}
@@ -502,23 +502,23 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
           </div>
 
           {/* Debt Distribution Breakdown */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <TrendingDown className="w-5 h-5 text-rose-400" /> Debt Distribution & Financing
+                <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+                  <TrendingDown className="w-5 h-5 text-[var(--color-negative-text)]" /> Debt Distribution & Financing
                 </h2>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--color-text-secondary)]">
                   Liabilities categorized by structure and interest cost
                 </p>
               </div>
-              <Link href="/liabilities" className="text-xs font-semibold text-rose-400 hover:underline">
+              <Link href="/liabilities" className="text-xs font-semibold text-[var(--color-negative-text)] hover:underline">
                 Manage Debt →
               </Link>
             </div>
 
             {debtAllocation.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 text-sm">
+              <div className="text-center py-8 text-[var(--color-text-secondary)] text-sm">
                 No active liabilities recorded. Outstanding debt is KES 0.00!
               </div>
             ) : (
@@ -526,11 +526,11 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
                 {debtAllocation.map((debt) => (
                   <div
                     key={debt.category}
-                    className="p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 flex items-center justify-between"
+                    className="p-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-center justify-between"
                   >
                     <div>
-                      <div className="text-sm font-semibold text-white">{debt.label}</div>
-                      <div className="text-xs text-slate-400">
+                      <div className="text-sm font-semibold text-[var(--color-text-primary)]">{debt.label}</div>
+                      <div className="text-xs text-[var(--color-text-secondary)]">
                         {debt.itemCount} account(s){" "}
                         {debt.averageInterestRate
                           ? `· Avg Interest: ${debt.averageInterestRate}%`
@@ -538,10 +538,10 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-bold text-rose-300">
+                      <div className="text-sm font-bold text-[var(--color-negative-text)]">
                         {formatMoney(debt.amount, currency)}
                       </div>
-                      <span className="text-xs text-slate-400">{debt.percentage}% of total debt</span>
+                      <span className="text-xs text-[var(--color-text-secondary)]">{debt.percentage}% of total debt</span>
                     </div>
                   </div>
                 ))}
@@ -553,10 +553,10 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
         {/* Right Column (1 Col): Attention Panel & Recent Activity */}
         <div className="space-y-8">
           {/* Attention & Action Needed */}
-          <div className="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-6 shadow-xl space-y-5">
+          <div className="bg-[var(--color-surface)] border border-amber-500/30 rounded-2xl p-6 shadow-xl space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-amber-400" /> Attention & Alerts
+              <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-[var(--color-warning-text)]" /> Attention & Alerts
               </h2>
               <Badge variant="warning" className="text-xs">
                 {attention.staleAssets.length +
@@ -569,7 +569,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
             {/* Stale Valuations */}
             {attention.staleAssets.length > 0 && (
               <div className="space-y-2.5">
-                <div className="text-xs font-semibold uppercase tracking-wider text-amber-400">
+                <div className="text-xs font-semibold uppercase tracking-wider text-[var(--color-warning-text)]">
                   Stale Valuations (&gt; 90 days)
                 </div>
                 {attention.staleAssets.map((asset) => (
@@ -578,15 +578,15 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
                     className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between"
                   >
                     <div>
-                      <div className="text-xs font-semibold text-white">{asset.name}</div>
-                      <div className="text-[11px] text-amber-300/80">
+                      <div className="text-xs font-semibold text-[var(--color-text-primary)]">{asset.name}</div>
+                      <div className="text-[11px] text-[var(--color-warning-text)]/80">
                         Valued {asset.daysSince} days ago ({formatMoney(asset.currentValue, currency)})
                       </div>
                     </div>
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="text-xs py-1 px-2.5 h-auto bg-amber-500/20 border-amber-500/30 text-amber-300"
+                      className="text-xs py-1 px-2.5 h-auto bg-amber-500/20 border-amber-500/30 text-[var(--color-warning-text)]"
                       onClick={() => {
                         setSelectedAsset(asset);
                         setValuationForm((prev) => ({
@@ -606,11 +606,11 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
 
             {/* Unvalued Assets */}
             {attention.unvaluedAssetCount > 0 && (
-              <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs flex items-center justify-between">
-                <span className="text-slate-300">
+              <div className="p-3 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs flex items-center justify-between">
+                <span className="text-[var(--color-text-secondary)]">
                   {attention.unvaluedAssetCount} asset(s) have no valuation recorded.
                 </span>
-                <Link href="/assets" className="text-sky-400 font-semibold hover:underline">
+                <Link href="/assets" className="text-sky-600 dark:text-sky-400 font-semibold hover:underline">
                   Review
                 </Link>
               </div>
@@ -619,7 +619,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
             {/* High Interest Liabilties */}
             {attention.highInterestLiabilities.length > 0 && (
               <div className="space-y-2.5">
-                <div className="text-xs font-semibold uppercase tracking-wider text-rose-400">
+                <div className="text-xs font-semibold uppercase tracking-wider text-[var(--color-negative-text)]">
                   High Interest Cost (&ge; 15%)
                 </div>
                 {attention.highInterestLiabilities.map((debt) => (
@@ -628,15 +628,15 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
                     className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between"
                   >
                     <div>
-                      <div className="text-xs font-semibold text-white">{debt.name}</div>
-                      <div className="text-[11px] text-rose-300">
+                      <div className="text-xs font-semibold text-[var(--color-text-primary)]">{debt.name}</div>
+                      <div className="text-[11px] text-[var(--color-negative-text)]">
                         {debt.interestRate}% interest · {formatMoney(debt.currentBalance, currency)}
                       </div>
                     </div>
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="text-xs py-1 px-2.5 h-auto bg-rose-500/20 border-rose-500/30 text-rose-300"
+                      className="text-xs py-1 px-2.5 h-auto bg-rose-500/20 border-rose-500/30 text-[var(--color-negative-text)]"
                       onClick={() => {
                         setRepaymentForm((prev) => ({
                           ...prev,
@@ -655,20 +655,20 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
             {attention.staleAssets.length === 0 &&
               attention.unvaluedAssetCount === 0 &&
               attention.highInterestLiabilities.length === 0 && (
-                <div className="py-6 text-center text-xs text-slate-400">
-                  <ShieldCheck className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+                <div className="py-6 text-center text-xs text-[var(--color-text-secondary)]">
+                  <ShieldCheck className="w-8 h-8 text-[var(--color-positive-text)] mx-auto mb-2" />
                   All asset valuations are current and no debt requires urgent attention.
                 </div>
               )}
           </div>
 
           {/* Recent Activity Stream */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Clock className="w-5 h-5 text-sky-400" /> Recent Activity
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-xl space-y-4">
+            <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+              <Clock className="w-5 h-5 text-sky-600 dark:text-sky-400" /> Recent Activity
             </h2>
             {recentActivity.length === 0 ? (
-              <div className="text-xs text-slate-400 text-center py-6">
+              <div className="text-xs text-[var(--color-text-secondary)] text-center py-6">
                 No repayments or valuation records found.
               </div>
             ) : (
@@ -676,16 +676,16 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
                 {recentActivity.map((act) => (
                   <div
                     key={`${act.type}-${act.id}`}
-                    className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/40 flex items-start justify-between"
+                    className="p-3 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] flex items-start justify-between"
                   >
                     <div className="space-y-0.5">
-                      <div className="text-xs font-semibold text-white">{act.title}</div>
-                      <div className="text-[11px] text-slate-400">{act.subtitle}</div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-xs font-semibold text-[var(--color-text-primary)]">{act.title}</div>
+                      <div className="text-[11px] text-[var(--color-text-secondary)]">{act.subtitle}</div>
+                      <div className="text-[10px] text-[var(--color-text-secondary)]">
                         {new Date(act.date).toLocaleDateString()}
                       </div>
                     </div>
-                    <div className="text-xs font-bold text-sky-300">
+                    <div className="text-xs font-bold text-sky-600 dark:text-sky-400">
                       {formatMoney(act.amount, act.currency)}
                     </div>
                   </div>
@@ -704,11 +704,11 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
       >
         <form onSubmit={handleRecordRepayment} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Select Liability</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Select Liability</label>
             <select
               value={repaymentForm.liabilityId}
               onChange={(e) => setRepaymentForm({ ...repaymentForm, liabilityId: e.target.value })}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
+              className="w-full bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)]"
               required
             >
               <option value="">Choose debt to pay...</option>
@@ -722,7 +722,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">
                 Principal Reduction ({currency})
               </label>
               <Input
@@ -743,7 +743,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">
                 Interest Amount ({currency})
               </label>
               <Input
@@ -766,7 +766,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">
                 Fee / Penalty ({currency})
               </label>
               <Input
@@ -786,7 +786,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">
                 Total Payment ({currency})
               </label>
               <Input
@@ -794,14 +794,14 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
                 step="0.01"
                 value={repaymentForm.totalAmount}
                 readOnly
-                className="bg-slate-900 border-slate-700 text-sky-400 font-bold"
+                className="bg-[var(--color-surface)] border-[var(--color-border)] text-sky-600 dark:text-sky-400 font-bold"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Payment Date</label>
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Payment Date</label>
               <Input
                 type="date"
                 value={repaymentForm.paymentDate}
@@ -810,11 +810,11 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Payment Method</label>
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Payment Method</label>
               <select
                 value={repaymentForm.paymentMethod}
                 onChange={(e) => setRepaymentForm({ ...repaymentForm, paymentMethod: e.target.value })}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)]"
               >
                 <option value="bank_transfer">Bank Transfer</option>
                 <option value="mpesa">M-Pesa</option>
@@ -827,7 +827,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Reference / Note</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Reference / Note</label>
             <Input
               type="text"
               placeholder="e.g. M-Pesa Ref QBL764..."
@@ -855,11 +855,11 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
       >
         <form onSubmit={handleRecordValuation} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Asset</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Asset</label>
             <select
               value={valuationForm.assetId}
               onChange={(e) => setValuationForm({ ...valuationForm, assetId: e.target.value })}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
+              className="w-full bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)]"
               required
             >
               <option value="">Choose asset...</option>
@@ -873,7 +873,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">
                 New Value ({currency})
               </label>
               <Input
@@ -886,7 +886,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">As Of Date</label>
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">As Of Date</label>
               <Input
                 type="date"
                 value={valuationForm.asOf}
@@ -898,11 +898,11 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Valuation Method</label>
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Valuation Method</label>
               <select
                 value={valuationForm.method}
                 onChange={(e) => setValuationForm({ ...valuationForm, method: e.target.value })}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)]"
               >
                 <option value="owner_estimate">Owner Estimate</option>
                 <option value="appraisal">Certified Appraisal</option>
@@ -913,11 +913,11 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Confidence</label>
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Confidence</label>
               <select
                 value={valuationForm.confidence}
                 onChange={(e) => setValuationForm({ ...valuationForm, confidence: e.target.value })}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)]"
               >
                 <option value="verified">Verified (Audited/Deed)</option>
                 <option value="recorded">Recorded (Official)</option>
@@ -928,7 +928,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Note / Justification</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Note / Justification</label>
             <Input
               type="text"
               placeholder="e.g. Annual valuation review or market comp"
@@ -956,11 +956,11 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
       >
         <form onSubmit={handleReconcileBalance} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Select Liability</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Select Liability</label>
             <select
               value={reconcileForm.liabilityId}
               onChange={(e) => setReconcileForm({ ...reconcileForm, liabilityId: e.target.value })}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
+              className="w-full bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)]"
               required
             >
               <option value="">Choose debt to reconcile...</option>
@@ -974,7 +974,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">
                 Statement Balance ({currency})
               </label>
               <Input
@@ -987,7 +987,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Effective Date</label>
+              <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Effective Date</label>
               <Input
                 type="date"
                 value={reconcileForm.effectiveDate}
@@ -998,11 +998,11 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Source</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Source</label>
             <select
               value={reconcileForm.source}
               onChange={(e) => setReconcileForm({ ...reconcileForm, source: e.target.value })}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
+              className="w-full bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)]"
             >
               <option value="statement">Bank / Lender Statement</option>
               <option value="lender_confirmation">Lender Confirmation / Letter</option>
@@ -1011,7 +1011,7 @@ export default function AssetsLiabilitiesOverviewClient({ user }) {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Reconciliation Notes</label>
+            <label className="text-xs font-semibold text-[var(--color-text-secondary)] block mb-1">Reconciliation Notes</label>
             <Input
               type="text"
               placeholder="e.g. Month-end statement snapshot"

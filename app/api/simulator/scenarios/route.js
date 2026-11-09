@@ -13,32 +13,18 @@ async function getHandler() {
   const userId = await requireUserId();
   await connectDB();
 
-  let scenarios = await FinancialScenario.find({
+  const scenarioDocs = await FinancialScenario.find({
     ownerId: userId,
     status: "active",
   })
     .sort({ isDefault: -1, updatedAt: -1 })
     .lean();
 
-  // If user has no saved scenarios, create initial Baseline
-  if (scenarios.length === 0) {
-    const defaultDoc = await FinancialScenario.create({
-      ownerId: userId,
-      name: "Baseline Scenario",
-      description: "Default starting trajectory based on current balances.",
-      isDefault: true,
-      timeHorizonYears: 5,
-      assumptions: DEFAULT_ASSUMPTIONS,
-      status: "active",
-    });
-    scenarios = [defaultDoc.toJSON()];
-  } else {
-    scenarios = scenarios.map((s) => ({
-      ...s,
-      id: s._id.toString(),
-      _id: undefined,
-    }));
-  }
+  const scenarios = scenarioDocs.map((s) => ({
+    ...s,
+    id: s._id.toString(),
+    _id: undefined,
+  }));
 
   return NextResponse.json({ scenarios });
 }

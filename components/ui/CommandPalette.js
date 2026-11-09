@@ -20,11 +20,8 @@ import {
   ShieldCheck,
   Settings,
   Plus,
-  Moon,
-  Sun,
   CornerDownLeft,
 } from "lucide-react";
-import { useTheme } from "@/components/providers/ThemeProvider";
 
 const NAV_COMMANDS = [
   { id: "nav-overview", label: "Go to Overview", section: "Navigation", href: "/overview", icon: LayoutDashboard },
@@ -50,7 +47,6 @@ const ACTION_COMMANDS = [
 
 export default function CommandPalette({ open, onClose }) {
   const router = useRouter();
-  const { theme, toggle: toggleTheme } = useTheme();
   const [query, setQuery] = useState("");
   // Cursor is keyed to the query it was moved under, so it derives back to 0
   // the moment the query changes — no reset effect needed.
@@ -102,15 +98,7 @@ export default function CommandPalette({ open, onClose }) {
   }, [query]);
 
   const commands = useMemo(() => {
-    const themeCommand = {
-      id: "act-theme",
-      label: theme === "dark" ? "Switch to light theme" : "Switch to dark theme",
-      section: "Quick actions",
-      icon: theme === "dark" ? Sun : Moon,
-      run: toggleTheme,
-    };
-
-    const all = [...NAV_COMMANDS, ...ACTION_COMMANDS, themeCommand];
+    const all = [...NAV_COMMANDS, ...ACTION_COMMANDS];
     const q = query.trim().toLowerCase();
     const filtered = q ? all.filter((c) => c.label.toLowerCase().includes(q)) : all;
 
@@ -134,7 +122,7 @@ export default function CommandPalette({ open, onClose }) {
     );
 
     return [...filtered, ...recordCommands];
-  }, [query, theme, toggleTheme, recordResults]);
+  }, [query, recordResults]);
 
   // Reset query and cursor whenever the palette closes; refocus the input on open.
   const handleClose = useCallback(() => {

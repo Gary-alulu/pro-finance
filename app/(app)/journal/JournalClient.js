@@ -3,14 +3,23 @@
 // Personal Financial Command Journal — Main Client Workspace.
 
 import { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { BookOpen, Plus, Sparkles } from "lucide-react";
 import JournalOverviewHeader from "@/components/journal/JournalOverviewHeader";
 import JournalFilterBar from "@/components/journal/JournalFilterBar";
 import JournalEntryCard from "@/components/journal/JournalEntryCard";
-import JournalEntryModal from "@/components/journal/JournalEntryModal";
-import JournalDetailDrawer from "@/components/journal/JournalDetailDrawer";
 import EmptyState from "@/components/ui/EmptyState";
 import SkeletonLoader from "@/components/ui/SkeletonLoader";
+
+// Modals/drawers are deferred until the user opens them.
+const JournalEntryModal = dynamic(
+  () => import("@/components/journal/JournalEntryModal"),
+  { ssr: false }
+);
+const JournalDetailDrawer = dynamic(
+  () => import("@/components/journal/JournalDetailDrawer"),
+  { ssr: false }
+);
 
 export default function JournalClient({ initialUser }) {
   const [entries, setEntries] = useState([]);
@@ -184,7 +193,7 @@ export default function JournalClient({ initialUser }) {
   }
 
   return (
-    <div className="space-y-6 pb-12 max-w-7xl mx-auto">
+    <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-12 space-y-6 max-w-7xl mx-auto">
       {/* ── Top Overview Header & Metrics ─────────────────────────────────── */}
       <JournalOverviewHeader metrics={metrics} onNewEntry={handleOpenCreate} />
 
@@ -257,16 +266,18 @@ export default function JournalClient({ initialUser }) {
       )}
 
       {/* ── Detail & Reflection Drawer ────────────────────────────────────── */}
-      <JournalDetailDrawer
-        entry={detailEntry}
-        isOpen={detailOpen}
-        onClose={() => setDetailOpen(false)}
-        onEdit={(e) => {
-          setDetailOpen(false);
-          handleOpenEdit(e);
-        }}
-        onUpdateOutcome={handleUpdateOutcome}
-      />
+      {detailOpen && (
+        <JournalDetailDrawer
+          entry={detailEntry}
+          isOpen={detailOpen}
+          onClose={() => setDetailOpen(false)}
+          onEdit={(e) => {
+            setDetailOpen(false);
+            handleOpenEdit(e);
+          }}
+          onUpdateOutcome={handleUpdateOutcome}
+        />
+      )}
     </div>
   );
 }

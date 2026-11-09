@@ -1,6 +1,6 @@
 "use client";
 // components/layout/TopBar.js
-// Top navigation bar: page title, global search, quick-create, theme toggle, profile.
+// Top navigation bar: page title, global search, quick-create, profile.
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -14,8 +14,6 @@ import {
   ChevronDown,
   Settings,
   LogOut,
-  Sun,
-  Moon,
   Landmark,
   TrendingUp,
   ArrowLeftRight,
@@ -23,7 +21,6 @@ import {
   ReceiptText,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useTheme } from "@/components/providers/ThemeProvider";
 
 const PAGE_TITLES = {
   "/overview":        { title: "Overview",              breadcrumb: [] },
@@ -62,7 +59,6 @@ function getPageInfo(pathname) {
 export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
   const pathname = usePathname();
   const { title } = getPageInfo(pathname);
-  const { theme, toggle: toggleTheme, mounted } = useTheme();
   const [profileOpen, setProfileOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
 
@@ -140,36 +136,6 @@ export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
           >
             ⌘K
           </kbd>
-        </button>
-
-        {/* Theme toggle */}
-        <button
-          id="theme-toggle-btn"
-          type="button"
-          onClick={toggleTheme}
-          suppressHydrationWarning
-          className="p-2 rounded-lg transition-colors cursor-pointer"
-          style={{ color: "var(--color-text-secondary)" }}
-          aria-label={
-            mounted
-              ? theme === "dark"
-                ? "Switch to light theme"
-                : "Switch to dark theme"
-              : "Toggle theme"
-          }
-          title={
-            mounted
-              ? theme === "dark"
-                ? "Light theme"
-                : "Dark theme"
-              : "Toggle theme"
-          }
-        >
-          {mounted ? (
-            theme === "dark" ? <Sun size={17} /> : <Moon size={17} />
-          ) : (
-            <span className="inline-block w-[17px] h-[17px]" />
-          )}
         </button>
 
         {/* Quick create */}

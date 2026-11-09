@@ -64,14 +64,14 @@ export default function DashboardHeader({
       {/* Top context line & primary controls */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-mono tracking-wider uppercase text-white/50">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono tracking-wider uppercase text-[var(--color-text-tertiary)]">
             <span>{todayFormatted}</span>
             <span>·</span>
             <span>Personal Account</span>
             <span>·</span>
-            <span className="text-emerald-400 font-medium">Kenya · KES Default</span>
+            <span className="text-[var(--color-positive-text)] font-medium">Kenya · KES Default</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white mt-1">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--color-text-primary)] mt-1">
             Financial Dashboard & Overview
           </h1>
         </div>
@@ -82,10 +82,10 @@ export default function DashboardHeader({
           <div className="relative">
             <button
               onClick={() => setCurrencyMenuOpen((v) => !v)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-medium rounded-xl border border-[var(--color-border)] bg-white/5 hover:bg-white/10 text-white transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-primary)] transition-colors"
             >
               <span>{reportingCurrency}</span>
-              <ChevronDown size={14} className="text-white/50" />
+              <ChevronDown size={14} className="text-[var(--color-text-tertiary)]" />
             </button>
 
             {currencyMenuOpen && (
@@ -98,7 +98,7 @@ export default function DashboardHeader({
                   className="absolute right-0 mt-1 z-50 w-44 rounded-xl border border-[var(--color-border)] p-1.5 shadow-xl text-xs space-y-0.5"
                   style={{ background: "var(--color-surface, #131d17)" }}
                 >
-                  <div className="px-2 py-1 text-[10px] uppercase font-mono text-white/40">
+                  <div className="px-2 py-1 text-[10px] uppercase font-mono text-[var(--color-text-tertiary)]">
                     Reporting Currency
                   </div>
                   {SUPPORTED_CURRENCIES.map((c) => (
@@ -110,12 +110,12 @@ export default function DashboardHeader({
                       }}
                       className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors ${
                         reportingCurrency === c.code
-                          ? "bg-emerald-500/15 text-emerald-400 font-semibold"
-                          : "text-white/80 hover:bg-white/5"
+                          ? "bg-emerald-500/15 text-[var(--color-positive-text)] font-semibold"
+                          : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-2)]"
                       }`}
                     >
                       <span>
-                        {c.code} <span className="text-white/40">({c.symbol})</span>
+                        {c.code} <span className="text-[var(--color-text-tertiary)]">({c.symbol})</span>
                       </span>
                       {reportingCurrency === c.code && <Check size={13} />}
                     </button>
@@ -128,10 +128,10 @@ export default function DashboardHeader({
           {/* Hide/reveal values toggle */}
           <button
             onClick={onToggleHideBalances}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl border border-[var(--color-border)] bg-white/5 hover:bg-white/10 text-white/80 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-secondary)] transition-colors"
             title={hideBalances ? "Reveal sensitive balances" : "Hide sensitive balances"}
           >
-            {hideBalances ? <EyeOff size={14} className="text-amber-400" /> : <Eye size={14} />}
+            {hideBalances ? <EyeOff size={14} className="text-[var(--color-warning-text)]" /> : <Eye size={14} />}
             <span className="hidden sm:inline">{hideBalances ? "Balances Masked" : "Hide"}</span>
           </button>
 
@@ -139,10 +139,10 @@ export default function DashboardHeader({
           <button
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="p-2 rounded-xl border border-[var(--color-border)] bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+            className="p-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
             title="Revalidate financial calculations & freshness"
           >
-            <RefreshCw size={14} className={isRefreshing ? "animate-spin text-emerald-400" : ""} />
+            <RefreshCw size={14} className={isRefreshing ? "animate-spin text-[var(--color-positive-text)]" : ""} />
           </button>
 
           {/* Export button */}
@@ -161,7 +161,7 @@ export default function DashboardHeader({
       {/* Filter bar: Period selector & Comparison toggle & Quality status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-[var(--color-border)]">
         {/* Period pill selector */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-black/30 border border-white/5 w-fit">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] w-fit">
           {PERIOD_OPTIONS.map((opt) => (
             <button
               key={opt.value}
@@ -169,7 +169,7 @@ export default function DashboardHeader({
               className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-all ${
                 period === opt.value
                   ? "bg-emerald-500 text-black shadow-sm font-semibold"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)]"
               }`}
             >
               {opt.label}
@@ -183,8 +183,8 @@ export default function DashboardHeader({
             onClick={onToggleCompare}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors border ${
               compareEnabled
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                : "border-white/10 bg-white/5 text-white/50 hover:text-white"
+                ? "bg-emerald-500/10 border-emerald-500/30 text-[var(--color-positive-text)]"
+                : "border-[var(--color-border)] bg-[var(--color-surface-2)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             <Calendar size={13} />
@@ -193,14 +193,14 @@ export default function DashboardHeader({
 
           {/* Data freshness badge */}
           {dataQuality && (
-            <div className="hidden md:flex items-center gap-1.5 text-xs text-white/50">
+            <div className="hidden md:flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)]">
               {dataQuality.isPartial ? (
-                <span className="flex items-center gap-1 text-amber-400">
+                <span className="flex items-center gap-1 text-[var(--color-warning-text)]">
                   <ShieldAlert size={14} />
                   <span>{dataQuality.missingValuationsCount + dataQuality.missingBalancesCount} items need review</span>
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-emerald-400">
+                <span className="flex items-center gap-1 text-[var(--color-positive-text)]">
                   <ShieldCheck size={14} />
                   <span>100% Verified</span>
                 </span>

@@ -2,17 +2,16 @@
 // components/command-centre/HealthScoreRing.js
 // Animated SVG ring that shows a 0-100 health score.
 
-import { useEffect, useRef } from "react";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { motion } from "framer-motion";
 
 const RADIUS = 54;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 function scoreToColor(score) {
-  if (score >= 80) return "#10b981"; // emerald
-  if (score >= 60) return "#f59e0b"; // amber
-  if (score >= 40) return "#f97316"; // orange
-  return "#ef4444";                  // red
+  if (score >= 80) return "#34d399"; // emerald
+  if (score >= 60) return "#fbbf24"; // amber
+  if (score >= 40) return "#fb923c"; // orange
+  return "#f87171";                  // red
 }
 
 function scoreLabel(score) {
@@ -38,7 +37,7 @@ export default function HealthScoreRing({ score = 0, loading = false }) {
             cy={70}
             r={RADIUS}
             fill="none"
-            stroke="rgba(255,255,255,0.06)"
+            stroke="var(--color-border-strong)"
             strokeWidth={10}
           />
           {/* Progress */}
@@ -64,7 +63,7 @@ export default function HealthScoreRing({ score = 0, loading = false }) {
               cy={70}
               r={RADIUS}
               fill="none"
-              stroke="rgba(255,255,255,0.08)"
+              stroke="var(--color-border-strong)"
               strokeWidth={10}
               strokeDasharray="34 300"
               className="animate-spin"
@@ -79,7 +78,7 @@ export default function HealthScoreRing({ score = 0, loading = false }) {
           aria-label={`Health score: ${clampedScore}`}
         >
           {loading ? (
-            <div className="w-10 h-5 rounded bg-white/10 animate-pulse" />
+            <div className="w-10 h-5 rounded bg-[var(--color-surface-3)] animate-pulse" />
           ) : (
             <>
               <motion.span
@@ -92,7 +91,7 @@ export default function HealthScoreRing({ score = 0, loading = false }) {
               >
                 {clampedScore}
               </motion.span>
-              <span className="text-xs font-medium mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>
+              <span className="text-xs font-semibold mt-0.5" style={{ color: "var(--color-text-secondary)" }}>
                 / 100
               </span>
             </>
@@ -102,7 +101,7 @@ export default function HealthScoreRing({ score = 0, loading = false }) {
 
       <div className="text-center">
         {loading ? (
-          <div className="w-16 h-4 rounded bg-white/10 animate-pulse mx-auto" />
+          <div className="w-16 h-4 rounded bg-[var(--color-surface-3)] animate-pulse mx-auto" />
         ) : (
           <motion.p
             initial={{ opacity: 0 }}

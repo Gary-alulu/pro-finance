@@ -6,18 +6,39 @@
 // explainable and actionable view.
 
 import { useState, useCallback, useTransition } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import FinancialSummarySection from "@/components/dashboard/FinancialSummarySection";
 import AssetsLiabilitiesSection from "@/components/dashboard/AssetsLiabilitiesSection";
 import CashFlowSection from "@/components/dashboard/CashFlowSection";
 import InvestmentOverviewSection from "@/components/dashboard/InvestmentOverviewSection";
-import FinancialTrendsSection from "@/components/dashboard/FinancialTrendsSection";
 import GoalsAccountabilitySection from "@/components/dashboard/GoalsAccountabilitySection";
 import CommandCentreAlertsSection from "@/components/dashboard/CommandCentreAlertsSection";
 import RecentActivitySection from "@/components/dashboard/RecentActivitySection";
-import TraceabilityModal from "@/components/dashboard/TraceabilityModal";
-import ExportModal from "@/components/dashboard/ExportModal";
+
+// Recharts is heavy — keep the chart section in its own chunk.
+const FinancialTrendsSection = dynamic(
+  () => import("@/components/dashboard/FinancialTrendsSection"),
+  {
+    loading: () => (
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-xl">
+        <div className="h-5 w-56 rounded bg-[var(--color-surface-3)] animate-pulse" />
+        <div className="mt-2 h-3 w-72 max-w-full rounded bg-[var(--color-surface-3)] animate-pulse" />
+        <div className="mt-6 h-72 w-full rounded-xl bg-[var(--color-surface-2)] animate-pulse" />
+      </div>
+    ),
+  }
+);
+
+// Modals are only needed after a user action.
+const TraceabilityModal = dynamic(
+  () => import("@/components/dashboard/TraceabilityModal"),
+  { ssr: false }
+);
+const ExportModal = dynamic(
+  () => import("@/components/dashboard/ExportModal"),
+  { ssr: false }
+);
 
 export default function OverviewClient({
   user,
@@ -88,7 +109,7 @@ export default function OverviewClient({
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 space-y-8 max-w-screen-2xl mx-auto text-white">
+    <div className="p-4 sm:p-6 md:p-8 space-y-8 max-w-screen-2xl mx-auto text-[var(--color-text-primary)]">
       {/* ── Header Command Bar ─────────────────────────────────────────── */}
       <DashboardHeader
         reportingCurrency={reportingCurrency}
@@ -222,21 +243,25 @@ export default function OverviewClient({
       )}
 
       {/* ── Traceability Modal ─────────────────────────────────────────── */}
-      <TraceabilityModal
-        isOpen={traceModal.isOpen}
-        onClose={handleCloseTrace}
-        metric={traceModal.metric}
-        reportingCurrency={reportingCurrency}
-        period={period}
-      />
+      {traceModal.isOpen && (
+        <TraceabilityModal
+          isOpen={traceModal.isOpen}
+          onClose={handleCloseTrace}
+          metric={traceModal.metric}
+          reportingCurrency={reportingCurrency}
+          period={period}
+        />
+      )}
 
       {/* ── Export Modal ──────────────────────────────────────────────── */}
-      <ExportModal
-        isOpen={exportModalOpen}
-        onClose={() => setExportModalOpen(false)}
-        reportingCurrency={reportingCurrency}
-        currentPeriod={period}
-      />
+      {exportModalOpen && (
+        <ExportModal
+          isOpen={exportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+          reportingCurrency={reportingCurrency}
+          currentPeriod={period}
+        />
+      )}
     </div>
   );
 }

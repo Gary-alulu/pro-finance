@@ -220,7 +220,7 @@ export default function AlertCard({ alert, onDismiss, onAcknowledge }) {
                     onClick={() => onAcknowledge(alert.id)}
                     className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
                     style={{
-                      background: "rgba(255,255,255,0.06)",
+                      background: "var(--color-surface-2)",
                       color: "var(--color-text-secondary)",
                       border: "1px solid var(--color-border)",
                     }}

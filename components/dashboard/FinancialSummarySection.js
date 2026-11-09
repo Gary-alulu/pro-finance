@@ -57,19 +57,16 @@ export default function FinancialSummarySection({
         {/* Net Worth Hero Card (Spans 2 columns on larger screens) */}
         <motion.div
           variants={STAGGER_ITEM}
-          className="sm:col-span-2 relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between border border-emerald-500/20 shadow-xl"
-          style={{
-            background: "linear-gradient(135deg, #091a11 0%, #11291b 50%, #163824 100%)",
-          }}
+          className="sm:col-span-2 relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between border border-emerald-500/20 shadow-xl bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-[#091a11] dark:via-[#11291b] dark:to-[#163824]"
         >
           <div>
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-mono uppercase tracking-wider text-white/50">
+              <span className="text-xs font-mono uppercase tracking-wider text-[var(--color-text-secondary)]">
                 Total Net Worth
               </span>
               <button
                 onClick={() => onOpenTrace("netWorth")}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-[var(--color-positive-text)] bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors"
               >
                 <Calculator size={13} />
                 <span>Explain calculation</span>
@@ -79,7 +76,7 @@ export default function FinancialSummarySection({
             {/* Net Worth Amount & Comparison */}
             <div className="mt-3 flex flex-wrap items-baseline gap-3">
               <span
-                className={`text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white transition-all ${
+                className={`text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[var(--color-text-primary)] transition-all ${
                   hideBalances ? "blur-md select-none" : ""
                 }`}
               >
@@ -90,35 +87,35 @@ export default function FinancialSummarySection({
                 <div
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
                     comparison.isPositive
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                      : "bg-red-500/20 text-red-300 border border-red-500/30"
+                      ? "bg-emerald-500/20 text-[var(--color-positive-text)] border border-emerald-500/30"
+                      : "bg-red-500/20 text-[var(--color-negative-text)] border border-red-500/30"
                   }`}
                 >
                   {comparison.isPositive ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
                   <span>{comparison.percentageChange}%</span>
-                  <span className="text-white/40 text-[10px] font-normal">vs last snapshot</span>
+                  <span className="text-[var(--color-text-secondary)] text-[10px] font-normal">vs last snapshot</span>
                 </div>
               )}
             </div>
 
             {/* Assets vs Liabilities Sub-strip */}
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 text-xs text-white/70">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 text-xs text-[var(--color-text-secondary)]">
               <button
                 onClick={() => onOpenTrace("totalAssets")}
-                className="hover:text-white transition-colors flex items-center gap-1.5"
+                className="hover:text-[var(--color-text-primary)] transition-colors flex items-center gap-1.5"
               >
-                <span className="text-white/40">Total Assets:</span>
-                <strong className={`text-emerald-400 font-mono ${hideBalances ? "blur-sm select-none" : ""}`}>
+                <span className="text-[var(--color-text-secondary)]">Total Assets:</span>
+                <strong className={`text-[var(--color-positive-text)] font-mono ${hideBalances ? "blur-sm select-none" : ""}`}>
                   {totalAssets != null ? mask(totalAssets, formatCurrency(totalAssets, currency)) : "—"}
                 </strong>
               </button>
               <span>·</span>
               <button
                 onClick={() => onOpenTrace("totalLiabilities")}
-                className="hover:text-white transition-colors flex items-center gap-1.5"
+                className="hover:text-[var(--color-text-primary)] transition-colors flex items-center gap-1.5"
               >
-                <span className="text-white/40">Total Liabilities:</span>
-                <strong className={`text-rose-400 font-mono ${hideBalances ? "blur-sm select-none" : ""}`}>
+                <span className="text-[var(--color-text-secondary)]">Total Liabilities:</span>
+                <strong className={`text-[var(--color-negative-text)] font-mono ${hideBalances ? "blur-sm select-none" : ""}`}>
                   {totalLiabilities != null ? mask(totalLiabilities, formatCurrency(totalLiabilities, currency)) : "—"}
                 </strong>
               </button>
@@ -126,7 +123,7 @@ export default function FinancialSummarySection({
           </div>
 
           {/* Disclosure */}
-          <div className="flex items-center gap-1.5 mt-5 pt-3 border-t border-white/10 text-[11px] text-white/40">
+          <div className="flex items-center gap-1.5 mt-5 pt-3 border-t border-[var(--color-border-strong)] text-[11px] text-[var(--color-text-secondary)]">
             <Info size={12} className="flex-shrink-0" />
             <span>Deterministic sum of attributable assets minus outstanding liabilities.</span>
           </div>
@@ -136,24 +133,24 @@ export default function FinancialSummarySection({
         <motion.div
           variants={STAGGER_ITEM}
           onClick={() => onOpenTrace("cashAndEquivalents")}
-          className="p-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-emerald-500/30 transition-all cursor-pointer flex flex-col justify-between group shadow-lg"
+          className="p-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-emerald-500/30 transition-all cursor-pointer flex flex-col justify-between group shadow-lg min-w-0 overflow-hidden"
         >
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-wider text-white/50">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-[var(--color-text-tertiary)] break-words min-w-0">
                 Cash & Equivalents
               </span>
-              <div className="p-2 rounded-xl bg-white/5 text-emerald-400 group-hover:bg-emerald-500/10 transition-colors">
+              <div className="p-2 rounded-xl bg-[var(--color-surface-2)] text-[var(--color-positive-text)] group-hover:bg-emerald-500/10 transition-colors">
                 <Wallet size={16} />
               </div>
             </div>
-            <div className={`mt-3 text-2xl font-semibold text-white tracking-tight ${hideBalances ? "blur-md select-none" : ""}`}>
+            <div className={`mt-3 text-xl sm:text-2xl font-semibold text-[var(--color-text-primary)] tracking-tight leading-tight break-words ${hideBalances ? "blur-md select-none" : ""}`}>
               {cashEquivalents != null ? mask(cashEquivalents, formatCurrency(cashEquivalents, currency)) : "—"}
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs text-white/40 mt-4 pt-2 border-t border-white/5">
+          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-[var(--color-text-tertiary)] mt-4 pt-2 border-t border-[var(--color-border)]">
             <span>Liquid bank & cash accounts</span>
-            <span className="text-emerald-400 group-hover:translate-x-0.5 transition-transform">Audit →</span>
+            <span className="text-[var(--color-positive-text)] group-hover:translate-x-0.5 transition-transform">Audit →</span>
           </div>
         </motion.div>
 
@@ -161,24 +158,24 @@ export default function FinancialSummarySection({
         <motion.div
           variants={STAGGER_ITEM}
           onClick={() => onOpenTrace("investmentValue")}
-          className="p-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-emerald-500/30 transition-all cursor-pointer flex flex-col justify-between group shadow-lg"
+          className="p-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-emerald-500/30 transition-all cursor-pointer flex flex-col justify-between group shadow-lg min-w-0 overflow-hidden"
         >
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-wider text-white/50">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-[var(--color-text-tertiary)] break-words min-w-0">
                 Investments Portfolio
               </span>
-              <div className="p-2 rounded-xl bg-white/5 text-emerald-400 group-hover:bg-emerald-500/10 transition-colors">
+              <div className="p-2 rounded-xl bg-[var(--color-surface-2)] text-[var(--color-positive-text)] group-hover:bg-emerald-500/10 transition-colors">
                 <Briefcase size={16} />
               </div>
             </div>
-            <div className={`mt-3 text-2xl font-semibold text-white tracking-tight ${hideBalances ? "blur-md select-none" : ""}`}>
+            <div className={`mt-3 text-xl sm:text-2xl font-semibold text-[var(--color-text-primary)] tracking-tight leading-tight break-words ${hideBalances ? "blur-md select-none" : ""}`}>
               {investmentValue != null ? mask(investmentValue, formatCurrency(investmentValue, currency)) : "—"}
             </div>
           </div>
-          <div className="flex items-center justify-between text-xs text-white/40 mt-4 pt-2 border-t border-white/5">
+          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-[var(--color-text-tertiary)] mt-4 pt-2 border-t border-[var(--color-border)]">
             <span>Holdings at latest recorded price</span>
-            <span className="text-emerald-400 group-hover:translate-x-0.5 transition-transform">Audit →</span>
+            <span className="text-[var(--color-positive-text)] group-hover:translate-x-0.5 transition-transform">Audit →</span>
           </div>
         </motion.div>
       </div>
@@ -188,65 +185,65 @@ export default function FinancialSummarySection({
         {/* Total Income */}
         <div
           onClick={() => onOpenTrace("cashFlow")}
-          className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-white/20 transition-all cursor-pointer group"
+          className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-[var(--color-border-strong)] transition-all cursor-pointer group"
         >
-          <div className="flex items-center justify-between text-xs text-white/50">
+          <div className="flex items-center justify-between text-xs text-[var(--color-text-tertiary)]">
             <span>Period Income</span>
-            <ArrowUpRight size={15} className="text-emerald-400" />
+            <ArrowUpRight size={15} className="text-[var(--color-positive-text)]" />
           </div>
-          <div className={`text-lg sm:text-xl font-semibold text-white mt-2 ${hideBalances ? "blur-sm select-none" : ""}`}>
+          <div className={`text-lg sm:text-xl font-semibold text-[var(--color-text-primary)] mt-2 ${hideBalances ? "blur-sm select-none" : ""}`}>
             {income != null ? mask(income, formatCurrency(income, currency)) : "—"}
           </div>
-          <span className="text-[11px] text-white/40 mt-1 block">Confirmed inflows</span>
+          <span className="text-[11px] text-[var(--color-text-tertiary)] mt-1 block">Confirmed inflows</span>
         </div>
 
         {/* Total Expenses */}
         <div
           onClick={() => onOpenTrace("cashFlow")}
-          className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-white/20 transition-all cursor-pointer group"
+          className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-[var(--color-border-strong)] transition-all cursor-pointer group"
         >
-          <div className="flex items-center justify-between text-xs text-white/50">
+          <div className="flex items-center justify-between text-xs text-[var(--color-text-tertiary)]">
             <span>Period Expenses</span>
-            <ArrowDownRight size={15} className="text-rose-400" />
+            <ArrowDownRight size={15} className="text-[var(--color-negative-text)]" />
           </div>
-          <div className={`text-lg sm:text-xl font-semibold text-white mt-2 ${hideBalances ? "blur-sm select-none" : ""}`}>
+          <div className={`text-lg sm:text-xl font-semibold text-[var(--color-text-primary)] mt-2 ${hideBalances ? "blur-sm select-none" : ""}`}>
             {expenses != null ? mask(expenses, formatCurrency(expenses, currency)) : "—"}
           </div>
-          <span className="text-[11px] text-white/40 mt-1 block">Confirmed consumption</span>
+          <span className="text-[11px] text-[var(--color-text-tertiary)] mt-1 block">Confirmed consumption</span>
         </div>
 
         {/* Net Cash Flow */}
         <div
           onClick={() => onOpenTrace("netCashFlow")}
-          className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-white/20 transition-all cursor-pointer group"
+          className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-[var(--color-border-strong)] transition-all cursor-pointer group"
         >
-          <div className="flex items-center justify-between text-xs text-white/50">
+          <div className="flex items-center justify-between text-xs text-[var(--color-text-tertiary)]">
             <span>Net Cash Flow</span>
-            <PiggyBank size={15} className="text-emerald-400" />
+            <PiggyBank size={15} className="text-[var(--color-positive-text)]" />
           </div>
           <div
             className={`text-lg sm:text-xl font-semibold mt-2 ${
-              netCashFlow && Number(netCashFlow) >= 0 ? "text-emerald-400" : "text-rose-400"
+              netCashFlow && Number(netCashFlow) >= 0 ? "text-[var(--color-positive-text)]" : "text-[var(--color-negative-text)]"
             } ${hideBalances ? "blur-sm select-none" : ""}`}
           >
             {netCashFlow != null ? mask(netCashFlow, formatCurrency(netCashFlow, currency)) : "—"}
           </div>
-          <span className="text-[11px] text-white/40 mt-1 block">Income − Expenses</span>
+          <span className="text-[11px] text-[var(--color-text-tertiary)] mt-1 block">Income − Expenses</span>
         </div>
 
         {/* Savings Rate */}
         <div
           onClick={() => onOpenTrace("savingsRate")}
-          className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-white/20 transition-all cursor-pointer group"
+          className="p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface,#131d17)] hover:border-[var(--color-border-strong)] transition-all cursor-pointer group"
         >
-          <div className="flex items-center justify-between text-xs text-white/50">
+          <div className="flex items-center justify-between text-xs text-[var(--color-text-tertiary)]">
             <span>Savings Rate</span>
-            <Percent size={15} className="text-emerald-400" />
+            <Percent size={15} className="text-[var(--color-positive-text)]" />
           </div>
-          <div className="text-lg sm:text-xl font-semibold text-white mt-2">
+          <div className="text-lg sm:text-xl font-semibold text-[var(--color-text-primary)] mt-2">
             {savingsRate !== null ? `${savingsRate}%` : "—"}
           </div>
-          <span className="text-[11px] text-white/40 mt-1 block">Net flow / income ratio</span>
+          <span className="text-[11px] text-[var(--color-text-tertiary)] mt-1 block">Net flow / income ratio</span>
         </div>
       </div>
     </div>

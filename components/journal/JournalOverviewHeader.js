@@ -145,7 +145,7 @@ export default function JournalOverviewHeader({ metrics, onNewEntry }) {
             <span className="text-xs font-medium" style={{ color: "var(--color-text-secondary)" }}>
               Archived Entries
             </span>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-500/10 text-slate-400">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--color-surface-2)] text-[var(--color-text-secondary)]">
               <Tag size={16} />
             </div>
           </div>

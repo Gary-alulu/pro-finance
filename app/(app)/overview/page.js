@@ -19,15 +19,17 @@ async function OverviewData({ user }) {
   const userId = user?.id;
   if (!userId) return <OverviewClient user={user} />;
 
-  const [overview, account] = await Promise.all([
-    getDashboardOverview(userId, {
-      period: "30d",
-      reportingCurrency: user?.preferredCurrency || "KES",
-    }),
-    getUserSettings(userId),
-  ]);
-
+  // getUserSettings is request-cached and already loaded by the layout.
+  const account = await getUserSettings(userId);
   const settings = account?.settings;
+
+  const overview = await getDashboardOverview(userId, {
+    period: "30d",
+    reportingCurrency:
+      settings?.financial?.reportingCurrency ||
+      user?.preferredCurrency ||
+      "KES",
+  });
 
   return (
     <OverviewClient

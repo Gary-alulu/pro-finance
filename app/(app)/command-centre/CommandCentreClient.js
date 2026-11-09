@@ -27,7 +27,7 @@ import EmptyState from "@/components/ui/EmptyState";
 
 // Lazy-load heavy sub-panels
 const HealthScoreRing = dynamic(() => import("@/components/command-centre/HealthScoreRing"), {
-  loading: () => <div className="w-36 h-36 rounded-full bg-white/5 animate-pulse mx-auto" />,
+  loading: () => <div className="w-36 h-36 rounded-full bg-[var(--color-surface-3)] animate-pulse mx-auto" />,
   ssr: false,
 });
 const AlertCard = dynamic(() => import("@/components/command-centre/AlertCard"), { ssr: false });
@@ -46,16 +46,16 @@ function severityIcon(sev) {
   return <Info size={14} style={{ color: "#3b82f6" }} />;
 }
 
-function SeverityPill({ count, severity, label, color }) {
+function SeverityPill({ count, severity, label, color, labelColor }) {
   return (
     <div
       className="flex items-center gap-1.5 px-3 py-2 rounded-xl"
-      style={{ background: `${color}14`, border: `1px solid ${color}30` }}
+      style={{ background: `${color}1f`, border: `1px solid ${color}40` }}
     >
       <span className="font-bold text-lg leading-none" style={{ color }}>
         {count ?? 0}
       </span>
-      <span className="text-xs" style={{ color: `${color}cc` }}>
+      <span className="text-[11px] font-semibold leading-tight" style={{ color: labelColor || color }}>
         {label}
       </span>
     </div>
@@ -385,24 +385,21 @@ export default function CommandCentreClient({ user }) {
           variants={STAGGER.item}
           className="lg:col-span-1 rounded-2xl p-6 flex flex-col items-center gap-6"
           style={{
-            background: "linear-gradient(135deg, #0d2116 0%, #1c3828 100%)",
-            border: "1px solid rgba(16,185,129,0.18)",
-            boxShadow: "var(--shadow-lg)",
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            boxShadow: "var(--shadow-sm)",
           }}
         >
-          <p
-            className="text-xs font-semibold uppercase tracking-widest w-full"
-            style={{ color: "rgba(255,255,255,0.4)" }}
-          >
+          <p className="text-xs font-semibold uppercase tracking-widest w-full text-[var(--color-text-secondary)]">
             Financial Health Score
           </p>
           <HealthScoreRing score={healthScore} loading={loading} />
 
-          <div className="w-full grid grid-cols-2 gap-2">
-            <SeverityPill count={counts.critical} severity="critical" label="Critical" color="#ef4444" />
-            <SeverityPill count={counts.high} severity="high" label="High" color="#f97316" />
-            <SeverityPill count={counts.medium} severity="medium" label="Medium" color="#f59e0b" />
-            <SeverityPill count={counts.low} severity="low" label="Low" color="#3b82f6" />
+          <div className="w-full grid grid-cols-2 gap-2 border-t border-[var(--color-border)] pt-4">
+            <SeverityPill count={counts.critical} severity="critical" label="Critical" color="#ef4444" labelColor="#fca5a5" />
+            <SeverityPill count={counts.high} severity="high" label="High" color="#f97316" labelColor="#fdba74" />
+            <SeverityPill count={counts.medium} severity="medium" label="Medium" color="#f59e0b" labelColor="#fcd34d" />
+            <SeverityPill count={counts.low} severity="low" label="Low" color="#3b82f6" labelColor="#93c5fd" />
           </div>
         </motion.div>
 

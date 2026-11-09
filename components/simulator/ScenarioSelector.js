@@ -83,29 +83,36 @@ export default function ScenarioSelector({
             <select
               value={activeScenarioId || ""}
               onChange={(e) => onSelectScenario(e.target.value)}
-              className="text-sm font-bold py-1 px-3 rounded-lg border cursor-pointer outline-none"
+              disabled={scenarios.length === 0}
+              className="text-sm font-bold py-1 px-3 rounded-lg border cursor-pointer outline-none disabled:opacity-75"
               style={{
                 background: "var(--color-surface-2)",
                 borderColor: "var(--color-border)",
                 color: "var(--color-text-primary)",
               }}
             >
-              {scenarios.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} {s.isDefault ? "(Baseline)" : ""}
-                </option>
-              ))}
+              {scenarios.length === 0 ? (
+                <option value="">Draft / Unsaved Scenario</option>
+              ) : (
+                scenarios.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} {s.isDefault ? "(Baseline)" : ""}
+                  </option>
+                ))
+              )}
             </select>
 
-            <button
-              type="button"
-              onClick={startRename}
-              className="p-1 rounded hover:bg-[var(--color-surface-2)] transition-colors"
-              style={{ color: "var(--color-text-tertiary)" }}
-              title="Rename scenario"
-            >
-              <Edit2 size={13} />
-            </button>
+            {activeScenario && (
+              <button
+                type="button"
+                onClick={startRename}
+                className="p-1 rounded hover:bg-[var(--color-surface-2)] transition-colors"
+                style={{ color: "var(--color-text-tertiary)" }}
+                title="Rename scenario"
+              >
+                <Edit2 size={13} />
+              </button>
+            )}
           </div>
         )}
 
@@ -132,19 +139,21 @@ export default function ScenarioSelector({
         )}
 
         {/* Duplicate button */}
-        <button
-          type="button"
-          onClick={onDuplicateScenario}
-          className="text-xs px-3 py-1.5 rounded-lg border font-medium transition-all hover:bg-[var(--color-surface-2)] flex items-center gap-1.5"
-          style={{
-            borderColor: "var(--color-border)",
-            color: "var(--color-text-secondary)",
-          }}
-          title="Duplicate current scenario"
-        >
-          <Copy size={13} />
-          Duplicate
-        </button>
+        {activeScenario && (
+          <button
+            type="button"
+            onClick={onDuplicateScenario}
+            className="text-xs px-3 py-1.5 rounded-lg border font-medium transition-all hover:bg-[var(--color-surface-2)] flex items-center gap-1.5"
+            style={{
+              borderColor: "var(--color-border)",
+              color: "var(--color-text-secondary)",
+            }}
+            title="Duplicate current scenario"
+          >
+            <Copy size={13} />
+            Duplicate
+          </button>
+        )}
 
         {/* New scenario button */}
         <button

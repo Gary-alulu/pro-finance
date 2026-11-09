@@ -69,16 +69,16 @@ export default function RecentActivitySection({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold tracking-tight text-white">Recent Financial Activity</h2>
-            <span className="text-xs font-mono text-white/40">Multi-Module Audit Trail</span>
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--color-text-primary)]">Recent Financial Activity</h2>
+            <span className="text-xs font-mono text-[var(--color-text-tertiary)]">Multi-Module Audit Trail</span>
           </div>
-          <p className="text-xs text-white/50 mt-0.5">
+          <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
             Chronological stream of financial events across transactions, investments, debt, and decisions.
           </p>
         </div>
 
         {/* Filter Switcher */}
-        <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-black/40 border border-white/5 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[var(--color-surface-3)] border border-[var(--color-border)] self-start sm:self-auto">
           {[
             { id: "all", label: "All Events" },
             { id: "transactions", label: "Transactions" },
@@ -92,7 +92,7 @@ export default function RecentActivitySection({
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                 filter === tab.id
                   ? "bg-emerald-500 text-black font-semibold shadow"
-                  : "text-white/60 hover:text-white"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
               {tab.label}
@@ -104,22 +104,22 @@ export default function RecentActivitySection({
       {/* Activity List */}
       <div className="space-y-2">
         {filteredItems.length > 0 ? (
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-[var(--color-border)]">
             {filteredItems.slice(0, 10).map((act) => {
               const Icon = ICONS[act.type] || DollarSign;
               return (
                 <div
                   key={act.id}
-                  className="py-3 px-2 flex items-center justify-between gap-3 hover:bg-white/[0.02] rounded-xl transition-colors group"
+                  className="py-3 px-2 flex items-center justify-between gap-3 hover:bg-[var(--color-surface-2)] rounded-xl transition-colors group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={`p-2 rounded-xl flex-shrink-0 ${
                         act.isInflow
-                          ? "bg-emerald-500/10 text-emerald-400"
+                          ? "bg-emerald-500/10 text-[var(--color-positive-text)]"
                           : act.isOutflow
-                          ? "bg-rose-500/10 text-rose-400"
-                          : "bg-white/5 text-white/60"
+                          ? "bg-rose-500/10 text-[var(--color-negative-text)]"
+                          : "bg-[var(--color-surface-2)] text-[var(--color-text-secondary)]"
                       }`}
                     >
                       {act.isInflow ? (
@@ -132,13 +132,13 @@ export default function RecentActivitySection({
                     </div>
 
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold text-white truncate group-hover:text-emerald-400 transition-colors">
+                      <div className="text-sm font-semibold text-[var(--color-text-primary)] truncate group-hover:text-[var(--color-positive-text)] transition-colors">
                         {act.title}
                       </div>
-                      <div className="flex items-center gap-2 text-[11px] text-white/40 mt-0.5">
+                      <div className="flex items-center gap-2 text-[11px] text-[var(--color-text-tertiary)] mt-0.5">
                         <span className="capitalize">{act.category?.replace(/_/g, " ")}</span>
                         <span>·</span>
-                        <span className="capitalize text-white/50">{act.sourceModule}</span>
+                        <span className="capitalize text-[var(--color-text-tertiary)]">{act.sourceModule}</span>
                         <span>·</span>
                         <span>{new Date(act.date).toLocaleDateString("en-KE", { month: "short", day: "numeric", year: "numeric" })}</span>
                       </div>
@@ -150,10 +150,10 @@ export default function RecentActivitySection({
                       <span
                         className={`font-mono text-sm font-semibold ${
                           act.isInflow
-                            ? "text-emerald-400"
+                            ? "text-[var(--color-positive-text)]"
                             : act.isOutflow
-                            ? "text-rose-400"
-                            : "text-white/80"
+                            ? "text-[var(--color-negative-text)]"
+                            : "text-[var(--color-text-secondary)]"
                         } ${hideBalances ? "blur-sm select-none" : ""}`}
                       >
                         {act.isInflow ? "+" : act.isOutflow ? "−" : ""}
@@ -168,7 +168,7 @@ export default function RecentActivitySection({
                     {act.href && (
                       <Link
                         href={act.href}
-                        className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-colors"
+                        className="p-1.5 rounded-lg text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-3)] transition-colors"
                         title="Open source record"
                       >
                         <ExternalLink size={13} />
@@ -180,8 +180,8 @@ export default function RecentActivitySection({
             })}
           </div>
         ) : (
-          <div className="p-8 text-center border border-dashed border-white/10 rounded-xl space-y-1">
-            <p className="text-xs text-white/50">No activity recorded for this category.</p>
+          <div className="p-8 text-center border border-dashed border-[var(--color-border)] rounded-xl space-y-1">
+            <p className="text-xs text-[var(--color-text-tertiary)]">No activity recorded for this category.</p>
           </div>
         )}
       </div>

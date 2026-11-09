@@ -16,12 +16,12 @@ export default function SnapshotCard({ snapshot, meta, currency = "KES", loading
           border: "1px solid var(--color-border)",
         }}
       >
-        <div className="h-4 bg-white/5 w-1/3 rounded mb-4" />
+        <div className="h-4 bg-[var(--color-surface-3)] w-1/3 rounded mb-4" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="h-12 bg-white/5 rounded" />
-          <div className="h-12 bg-white/5 rounded" />
-          <div className="h-12 bg-white/5 rounded" />
-          <div className="h-12 bg-white/5 rounded" />
+          <div className="h-12 bg-[var(--color-surface-3)] rounded" />
+          <div className="h-12 bg-[var(--color-surface-3)] rounded" />
+          <div className="h-12 bg-[var(--color-surface-3)] rounded" />
+          <div className="h-12 bg-[var(--color-surface-3)] rounded" />
         </div>
       </div>
     );

@@ -17,10 +17,10 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 
 const SEVERITY_BADGES = {
-  critical: "bg-red-500/20 text-red-300 border-red-500/30",
-  high: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-  medium: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-  low: "bg-neutral-500/20 text-neutral-300 border-neutral-500/30",
+  critical: "bg-red-500/20 text-[var(--color-negative-text)] border-red-500/30",
+  high: "bg-amber-500/20 text-[var(--color-warning-text)] border-amber-500/30",
+  medium: "bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30",
+  low: "bg-[var(--color-surface-3)] text-[var(--color-text-secondary)] border-[var(--color-border)]",
 };
 
 export default function CommandCentreAlertsSection({ alertsData }) {
@@ -36,29 +36,29 @@ export default function CommandCentreAlertsSection({ alertsData }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold tracking-tight text-white">Financial Command Centre</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--color-text-primary)]">Financial Command Centre</h2>
             {counts.critical > 0 ? (
               <Badge variant="destructive" className="text-xs uppercase">
                 {counts.critical} Critical
               </Badge>
             ) : counts.high > 0 ? (
-              <Badge variant="outline" className="text-xs uppercase border-amber-500/30 text-amber-300">
+              <Badge variant="outline" className="text-xs uppercase border-amber-500/30 text-[var(--color-warning-text)]">
                 {counts.high} High Priority
               </Badge>
             ) : (
-              <Badge variant="outline" className="text-xs uppercase border-emerald-500/30 text-emerald-400">
+              <Badge variant="outline" className="text-xs uppercase border-emerald-500/30 text-[var(--color-positive-text)]">
                 Stable
               </Badge>
             )}
           </div>
-          <p className="text-xs text-white/50 mt-0.5">
+          <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
             Early-warning surveillance for cash shortfalls, overdue invoices, stale valuations & data risks.
           </p>
         </div>
 
         <Link
           href="/command-centre"
-          className="text-xs text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-1 self-start sm:self-auto"
+          className="text-xs text-[var(--color-positive-text)] hover:text-[var(--color-positive-text)] font-medium inline-flex items-center gap-1 self-start sm:self-auto"
         >
           Full Command Centre ({counts.total}) →
         </Link>
@@ -75,7 +75,7 @@ export default function CommandCentreAlertsSection({ alertsData }) {
                   ? "bg-red-500/5 border-red-500/20 hover:border-red-500/40"
                   : alert.severity === "high"
                   ? "bg-amber-500/5 border-amber-500/20 hover:border-amber-500/40"
-                  : "bg-white/[0.02] border-white/5 hover:border-white/10"
+                  : "bg-[var(--color-surface-2)] border-[var(--color-border)] hover:border-[var(--color-border)]"
               }`}
             >
               <div className="space-y-1">
@@ -87,11 +87,11 @@ export default function CommandCentreAlertsSection({ alertsData }) {
                   >
                     {alert.severity}
                   </span>
-                  <span className="text-sm font-semibold text-white">{alert.title}</span>
+                  <span className="text-sm font-semibold text-[var(--color-text-primary)]">{alert.title}</span>
                 </div>
-                <p className="text-xs text-white/60">{alert.summary}</p>
+                <p className="text-xs text-[var(--color-text-secondary)]">{alert.summary}</p>
                 {alert.deadline && (
-                  <div className="flex items-center gap-1 text-[11px] text-white/40 pt-1">
+                  <div className="flex items-center gap-1 text-[11px] text-[var(--color-text-tertiary)] pt-1">
                     <Clock size={11} /> Deadline: {new Date(alert.deadline).toISOString().slice(0, 10)}
                   </div>
                 )}
@@ -112,18 +112,18 @@ export default function CommandCentreAlertsSection({ alertsData }) {
           {items.map((item) => (
             <div
               key={item.id}
-              className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between text-xs"
+              className="p-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] flex items-center justify-between text-xs"
             >
               <div className="flex items-center gap-2.5">
-                <AlertCircle size={15} className="text-amber-400 flex-shrink-0" />
+                <AlertCircle size={15} className="text-[var(--color-warning-text)] flex-shrink-0" />
                 <div>
-                  <span className="font-semibold text-white">{item.title}</span>
-                  <p className="text-white/50 text-[11px] mt-0.5">{item.reason}</p>
+                  <span className="font-semibold text-[var(--color-text-primary)]">{item.title}</span>
+                  <p className="text-[var(--color-text-tertiary)] text-[11px] mt-0.5">{item.reason}</p>
                 </div>
               </div>
 
               <Link href={item.actionHref || "/accountability"}>
-                <Button variant="ghost" size="sm" className="text-xs text-emerald-400 hover:text-emerald-300">
+                <Button variant="ghost" size="sm" className="text-xs text-[var(--color-positive-text)] hover:text-[var(--color-positive-text)]">
                   {item.actionLabel || "Review"} →
                 </Button>
               </Link>
@@ -131,10 +131,10 @@ export default function CommandCentreAlertsSection({ alertsData }) {
           ))}
         </div>
       ) : (
-        <div className="p-8 text-center border border-dashed border-white/10 rounded-xl space-y-2">
-          <ShieldAlert size={28} className="mx-auto text-emerald-400" />
-          <p className="text-sm font-medium text-white">No active financial alerts</p>
-          <p className="text-xs text-white/50">
+        <div className="p-8 text-center border border-dashed border-[var(--color-border)] rounded-xl space-y-2">
+          <ShieldAlert size={28} className="mx-auto text-[var(--color-positive-text)]" />
+          <p className="text-sm font-medium text-[var(--color-text-primary)]">No active financial alerts</p>
+          <p className="text-xs text-[var(--color-text-tertiary)]">
             Liquidity is healthy, valuations are fresh, and no obligations are overdue.
           </p>
         </div>

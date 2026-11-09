@@ -21,7 +21,7 @@ import {
 } from "@/lib/settings/defaults";
 
 const ThemeContext = createContext({
-  theme: "light",
+  theme: "dark",
   appearance: DEFAULT_SETTINGS.appearance,
   setTheme: () => {},
   toggle: () => {},
@@ -32,7 +32,11 @@ const ThemeContext = createContext({
 const STORAGE_KEY = "pf-theme";
 const emptySubscribe = () => () => {};
 
+// Dark mode is the only theme available on the platform for now.
+const FORCE_DARK_THEME = true;
+
 function resolveTheme(theme) {
+  if (FORCE_DARK_THEME) return "dark";
   if (theme === "dark") return "dark";
   if (theme === "light") return "light";
   if (typeof window === "undefined") return "light";
@@ -74,7 +78,7 @@ export function ThemeProvider({ children, initialAppearance }) {
     return {
       ...DEFAULT_SETTINGS.appearance,
       ...source,
-      theme: SUPPORTED_THEMES.includes(source.theme) ? source.theme : "system",
+      theme: SUPPORTED_THEMES.includes(source.theme) ? source.theme : "dark",
       accent: SUPPORTED_ACCENTS.includes(source.accent) ? source.accent : "emerald",
     };
   }, [initialAppearance]);
@@ -82,17 +86,17 @@ export function ThemeProvider({ children, initialAppearance }) {
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [appearance, setAppearance] = useState(safeInitial);
   // Deterministic initial theme on server and client initial render to guarantee hydration match
-  const [theme, setThemeState] = useState(() =>
-    safeInitial.theme === "dark" ? "dark" : "light"
-  );
+  const [theme, setThemeState] = useState(() => resolveTheme(safeInitial.theme));
 
-  // Apply the server-persisted appearance once after mount. A locally stored
-  // theme wins so the quick top-bar toggle stays instant between page loads.
+  // Apply the server-persisted appearance once after mount.
   useEffect(() => {
     const timer = setTimeout(() => {
       const stored = localStorage.getItem(STORAGE_KEY);
-      const preferredTheme =
-        stored && SUPPORTED_THEMES.includes(stored) ? stored : safeInitial.theme;
+      const preferredTheme = FORCE_DARK_THEME
+        ? "dark"
+        : stored && SUPPORTED_THEMES.includes(stored)
+          ? stored
+          : safeInitial.theme;
       const resolved = resolveTheme(preferredTheme);
       setThemeState(resolved);
       applyAppearanceToDocument({ ...safeInitial, theme: preferredTheme }, resolved);
@@ -102,7 +106,7 @@ export function ThemeProvider({ children, initialAppearance }) {
 
   // Follow OS theme changes while "system" is selected.
   useEffect(() => {
-    if (appearance.theme !== "system" || typeof window === "undefined") return;
+    if (FORCE_DARK_THEME || appearance.theme !== "system" || typeof window === "undefined") return;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => {
       const resolved = media.matches ? "dark" : "light";
@@ -115,7 +119,11 @@ export function ThemeProvider({ children, initialAppearance }) {
 
   const setTheme = useCallback(
     (nextTheme) => {
-      const safeTheme = SUPPORTED_THEMES.includes(nextTheme) ? nextTheme : "system";
+      const safeTheme = FORCE_DARK_THEME
+        ? "dark"
+        : SUPPORTED_THEMES.includes(nextTheme)
+          ? nextTheme
+          : "dark";
       const resolved = resolveTheme(safeTheme);
       setThemeState(resolved);
       setAppearance((prev) => {
@@ -129,6 +137,7 @@ export function ThemeProvider({ children, initialAppearance }) {
   );
 
   const toggle = useCallback(() => {
+    if (FORCE_DARK_THEME) return;
     setAppearance((prev) => {
       const nextTheme = resolveTheme(prev.theme) === "dark" ? "light" : "dark";
       const next = { ...prev, theme: nextTheme };
@@ -145,9 +154,11 @@ export function ThemeProvider({ children, initialAppearance }) {
     const next = {
       ...DEFAULT_SETTINGS.appearance,
       ...nextAppearance,
-      theme: SUPPORTED_THEMES.includes(nextAppearance.theme)
-        ? nextAppearance.theme
-        : "system",
+      theme: FORCE_DARK_THEME
+        ? "dark"
+        : SUPPORTED_THEMES.includes(nextAppearance.theme)
+          ? nextAppearance.theme
+          : "dark",
     };
     const resolved = resolveTheme(next.theme);
     setAppearance(next);

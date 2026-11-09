@@ -10,12 +10,7 @@ export default function OverviewSkeleton() {
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 xl:grid-cols-5">
         <div className="sm:col-span-3 xl:col-span-2">
           <div
-            className="p-6"
-            style={{
-              background: "linear-gradient(135deg, #0d2116 0%, #1c3828 100%)",
-              border: "1px solid rgba(16,185,129,0.2)",
-              borderRadius: "var(--radius-lg)",
-            }}
+            className="p-6 rounded-[var(--radius-lg)] border border-emerald-500/20 bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-[#0d2116] dark:to-[#1c3828]"
           >
             <SkeletonLoader className="h-4 w-32 rounded" />
             <SkeletonLoader className="h-10 w-48 rounded-lg mt-3 mb-4" />

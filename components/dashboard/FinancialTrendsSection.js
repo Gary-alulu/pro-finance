@@ -24,14 +24,13 @@ function ChartTooltip({ active, payload, label, currency }) {
   if (!active || !payload?.length) return null;
   return (
     <div
-      className="p-3 rounded-xl border border-white/10 text-xs shadow-xl space-y-1.5"
-      style={{ background: "#131d17", color: "#faf9f6" }}
+      className="p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-xs shadow-xl space-y-1.5"
     >
-      <div className="font-mono text-white/50 text-[11px]">{label}</div>
+      <div className="font-mono text-[var(--color-text-tertiary)] text-[11px]">{label}</div>
       {payload.map((item, idx) => (
         <div key={idx} className="flex items-center justify-between gap-4 font-mono">
           <span style={{ color: item.color }}>{item.name}:</span>
-          <span className="font-semibold text-white">
+          <span className="font-semibold text-[var(--color-text-primary)]">
             {formatCurrency(item.value, currency)}
           </span>
         </div>
@@ -62,16 +61,16 @@ export default function FinancialTrendsSection({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold tracking-tight text-white">Financial Trends & History</h2>
-            <span className="text-xs font-mono text-white/40">Historical Trajectory & Analysis</span>
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--color-text-primary)]">Financial Trends & History</h2>
+            <span className="text-xs font-mono text-[var(--color-text-tertiary)]">Historical Trajectory & Analysis</span>
           </div>
-          <p className="text-xs text-white/50 mt-0.5">
+          <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
             Preserves dated financial snapshots. Past data is never silently reconstructed.
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center p-1 rounded-xl bg-black/40 border border-white/5 self-start sm:self-auto">
+        <div className="flex items-center p-1 rounded-xl bg-[var(--color-surface-3)] border border-[var(--color-border)] self-start sm:self-auto">
           {[
             { id: "netWorth", label: "Net Worth" },
             { id: "assetsLiabilities", label: "Assets vs Debt" },
@@ -86,7 +85,7 @@ export default function FinancialTrendsSection({
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 activeChart === tab.id
                   ? "bg-emerald-500 text-black font-semibold shadow"
-                  : "text-white/60 hover:text-white"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
               {tab.label}
@@ -97,19 +96,19 @@ export default function FinancialTrendsSection({
 
       {/* Comparison Badge / Context */}
       {activeChart === "netWorth" && comparison && (
-        <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-black/30 border border-white/5 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-white/50">Trajectory in this period:</span>
+            <span className="text-[var(--color-text-tertiary)]">Trajectory in this period:</span>
             <span
               className={`font-semibold font-mono ${
-                comparison.isPositive ? "text-emerald-400" : "text-rose-400"
+                comparison.isPositive ? "text-[var(--color-positive-text)]" : "text-[var(--color-negative-text)]"
               }`}
             >
               {comparison.isPositive ? "+" : ""}
               {comparison.percentageChange}% ({formatCurrency(comparison.absoluteDelta, currency)})
             </span>
           </div>
-          <span className="text-white/40 font-mono text-[11px]">
+          <span className="text-[var(--color-text-tertiary)] font-mono text-[11px]">
             {netWorthData.length} snapshot point{netWorthData.length === 1 ? "" : "s"}
           </span>
         </div>
@@ -131,15 +130,15 @@ export default function FinancialTrendsSection({
                   }
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis
                   dataKey="date"
-                  stroke="rgba(255,255,255,0.3)"
-                  tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }}
+                  stroke="var(--color-border-strong)"
+                  tick={{ fontSize: 11, fill: "var(--color-text-tertiary)" }}
                 />
                 <YAxis
-                  stroke="rgba(255,255,255,0.3)"
-                  tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }}
+                  stroke="var(--color-border-strong)"
+                  tick={{ fontSize: 11, fill: "var(--color-text-tertiary)" }}
                   tickFormatter={(val) =>
                     val >= 1000000
                       ? `${(val / 1000000).toFixed(1)}M`
@@ -161,9 +160,9 @@ export default function FinancialTrendsSection({
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl p-6 text-center">
-              <p className="text-sm font-medium text-white/70">No historical snapshots recorded yet</p>
-              <p className="text-xs text-white/40 mt-1 max-w-sm">
+            <div className="h-full flex flex-col items-center justify-center border border-dashed border-[var(--color-border)] rounded-xl p-6 text-center">
+              <p className="text-sm font-medium text-[var(--color-text-secondary)]">No historical snapshots recorded yet</p>
+              <p className="text-xs text-[var(--color-text-tertiary)] mt-1 max-w-sm">
                 Historical trends will appear as snapshots are saved automatically or recorded over time.
               </p>
             </div>
@@ -172,15 +171,15 @@ export default function FinancialTrendsSection({
           hasNetWorthData ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={netWorthData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis
                   dataKey="date"
-                  stroke="rgba(255,255,255,0.3)"
-                  tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }}
+                  stroke="var(--color-border-strong)"
+                  tick={{ fontSize: 11, fill: "var(--color-text-tertiary)" }}
                 />
                 <YAxis
-                  stroke="rgba(255,255,255,0.3)"
-                  tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }}
+                  stroke="var(--color-border-strong)"
+                  tick={{ fontSize: 11, fill: "var(--color-text-tertiary)" }}
                   tickFormatter={(val) =>
                     val >= 1000000
                       ? `${(val / 1000000).toFixed(1)}M`
@@ -192,7 +191,7 @@ export default function FinancialTrendsSection({
                 <Tooltip content={<ChartTooltip currency={currency} />} />
                 <Legend
                   wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
-                  formatter={(value) => <span className="text-white/70">{value}</span>}
+                  formatter={(value) => <span className="text-[var(--color-text-secondary)]">{value}</span>}
                 />
                 <Line
                   type="monotone"
@@ -213,23 +212,23 @@ export default function FinancialTrendsSection({
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl p-6 text-center">
-              <p className="text-sm font-medium text-white/70">No balance sheet snapshots found</p>
-              <p className="text-xs text-white/40 mt-1">Snapshot balance history will appear here.</p>
+            <div className="h-full flex flex-col items-center justify-center border border-dashed border-[var(--color-border)] rounded-xl p-6 text-center">
+              <p className="text-sm font-medium text-[var(--color-text-secondary)]">No balance sheet snapshots found</p>
+              <p className="text-xs text-[var(--color-text-tertiary)] mt-1">Snapshot balance history will appear here.</p>
             </div>
           )
         ) : hasCashFlowData ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={cashFlowData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis
                 dataKey="label"
-                stroke="rgba(255,255,255,0.3)"
-                tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }}
+                stroke="var(--color-border-strong)"
+                tick={{ fontSize: 11, fill: "var(--color-text-tertiary)" }}
               />
               <YAxis
-                stroke="rgba(255,255,255,0.3)"
-                tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }}
+                stroke="var(--color-border-strong)"
+                tick={{ fontSize: 11, fill: "var(--color-text-tertiary)" }}
                 tickFormatter={(val) =>
                   val >= 1000000
                     ? `${(val / 1000000).toFixed(1)}M`
@@ -241,16 +240,16 @@ export default function FinancialTrendsSection({
               <Tooltip content={<ChartTooltip currency={currency} />} />
               <Legend
                 wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
-                formatter={(value) => <span className="text-white/70">{value}</span>}
+                formatter={(value) => <span className="text-[var(--color-text-secondary)]">{value}</span>}
               />
               <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
               <Bar dataKey="expenses" name="Expenses" fill="#f43f5e" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl p-6 text-center">
-            <p className="text-sm font-medium text-white/70">No monthly cash flow transactions</p>
-            <p className="text-xs text-white/40 mt-1">Monthly flows will render as transactions occur.</p>
+          <div className="h-full flex flex-col items-center justify-center border border-dashed border-[var(--color-border)] rounded-xl p-6 text-center">
+            <p className="text-sm font-medium text-[var(--color-text-secondary)]">No monthly cash flow transactions</p>
+            <p className="text-xs text-[var(--color-text-tertiary)] mt-1">Monthly flows will render as transactions occur.</p>
           </div>
         )}
       </div>
@@ -259,8 +258,8 @@ export default function FinancialTrendsSection({
       {selectedPoint && (
         <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center justify-between animate-fade-in">
           <div>
-            <span className="font-semibold text-white">Inspecting Date: {selectedPoint.date}</span>
-            <div className="flex items-center gap-4 text-white/70 mt-0.5 font-mono">
+            <span className="font-semibold text-[var(--color-text-primary)]">Inspecting Date: {selectedPoint.date}</span>
+            <div className="flex items-center gap-4 text-[var(--color-text-secondary)] mt-0.5 font-mono">
               <span>Net Worth: <strong>{formatCurrency(selectedPoint.data.netWorth, currency)}</strong></span>
               {selectedPoint.data.totalAssets && (
                 <span>Assets: <strong>{formatCurrency(selectedPoint.data.totalAssets, currency)}</strong></span>
@@ -272,7 +271,7 @@ export default function FinancialTrendsSection({
           </div>
           <button
             onClick={() => setSelectedPoint(null)}
-            className="text-xs text-emerald-400 hover:text-emerald-300 underline"
+            className="text-xs text-[var(--color-positive-text)] hover:text-[var(--color-positive-text)] underline"
           >
             Clear inspection
           </button>

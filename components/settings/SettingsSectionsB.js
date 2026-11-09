@@ -16,12 +16,9 @@ import {
   KeyRound,
   LayoutDashboard,
   Lock,
-  Monitor,
-  Moon,
   Palette,
   RefreshCw,
   ShieldCheck,
-  Sun,
   Trash2,
   UserX,
 } from "lucide-react";
@@ -49,14 +46,6 @@ const PASSWORD_RULES = [
   (v) => v.length >= 8,
   (v) => /[A-Z]/.test(v),
   (v) => /[0-9]/.test(v),
-];
-
-const THEME_ICONS = { light: Sun, dark: Moon, system: Monitor };
-
-const THEME_OPTIONS = [
-  { value: "light", label: "Light", hint: "Warm paper" },
-  { value: "dark", label: "Dark", hint: "Low light" },
-  { value: "system", label: "System", hint: "Follow device" },
 ];
 
 const RETENTION_OPTIONS = [
@@ -612,35 +601,11 @@ export function AppearanceSection({ settings, setPath }) {
       <SectionHeading
         icon={Palette}
         title="Appearance"
-        description="Theme, accent and density apply across the entire workspace the moment you save."
+        description="Accent and density apply across the entire workspace the moment you save."
       />
 
-      <Panel title="Theme">
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
-          {THEME_OPTIONS.map((option) => {
-            const Icon = THEME_ICONS[option.value] || Sun;
-            const active = appearance.theme === option.value;
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setPath("appearance.theme", option.value)}
-                aria-pressed={active}
-                className={`flex flex-col items-center gap-2.5 rounded-[var(--radius-lg)] border p-4 sm:p-5 transition-all cursor-pointer ${
-                  active
-                    ? "border-[var(--color-emerald-500)] bg-[var(--color-emerald-50)] text-[var(--color-emerald-700)] dark:bg-[var(--color-emerald-500)]/15 dark:text-[var(--color-emerald-400)] shadow-xs"
-                    : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-2)]"
-                }`}
-              >
-                <Icon className="h-6 w-6" aria-hidden="true" />
-                <span className="text-xs font-semibold">{option.label}</span>
-                {option.hint && (
-                  <span className="text-[10px] text-[var(--color-text-tertiary)]">{option.hint}</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+      <Panel title="Theme" description="Dark mode is currently the only theme available.">
+        <InlineNote>Light and system themes are temporarily disabled.</InlineNote>
       </Panel>
 
       <Panel
