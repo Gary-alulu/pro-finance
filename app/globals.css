@@ -176,6 +176,24 @@ body {
   font-feature-settings: "tnum" 1;
 }
 
+/* Privacy mode: figures detected by the global blur engine are blurred in
+   place so layout and labels stay intact. Toggled from the top bar / Alt+B. */
+[data-blur-figures="true"] [data-pf-blur],
+[data-blur-figures="true"] .privacy-blur {
+  filter: blur(7px);
+  -webkit-filter: blur(7px);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: filter 0.15s ease, -webkit-filter 0.15s ease;
+}
+
+/* Hover peek: temporarily reveals an individual figure on deliberate hover */
+[data-blur-figures="true"] [data-pf-blur]:hover,
+[data-blur-figures="true"] .privacy-blur:hover {
+  filter: blur(0px);
+  -webkit-filter: blur(0px);
+}
+
 /* ─── Scrollbar styling ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;

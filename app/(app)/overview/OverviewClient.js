@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useTransition } from "react";
 import dynamic from "next/dynamic";
+import { usePrivacy } from "@/components/providers/PrivacyProvider";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import FinancialSummarySection from "@/components/dashboard/FinancialSummarySection";
 import AssetsLiabilitiesSection from "@/components/dashboard/AssetsLiabilitiesSection";
@@ -53,7 +54,8 @@ export default function OverviewClient({
   );
   const [period, setPeriod] = useState("30d");
   const [compareEnabled, setCompareEnabled] = useState(true);
-  const [hideBalances, setHideBalances] = useState(initialHideValues);
+  const { blurFigures, toggleBlurFigures } = usePrivacy();
+  const hideBalances = blurFigures;
   const [layout, setLayout] = useState(dashboardLayout);
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -97,7 +99,7 @@ export default function OverviewClient({
   };
 
   const handleToggleHideBalances = () => {
-    setHideBalances((prev) => !prev);
+    toggleBlurFigures();
   };
 
   const handleOpenTrace = (metric) => {

@@ -260,8 +260,8 @@ export function SecuritySection({ settings, setPath, user }) {
       <Panel title="Privacy & retention">
         <div className="space-y-3">
           <ToggleRow
-            label="Mask sensitive values by default"
-            description="Amounts are hidden until you choose to reveal them. This is a display preference only."
+            label="Blur figures by default"
+            description="Blurs monetary figures across the app until revealed. Toggle anytime from the top bar or with Alt+B. Display preference only."
             checked={settings.security.hideSensitiveValues}
             onChange={(v) => setPath("security.hideSensitiveValues", v)}
           />

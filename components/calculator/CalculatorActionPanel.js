@@ -102,7 +102,10 @@ export default function CalculatorActionPanel({ isOpen, onClose, actionContext }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-2xl">
+      <div
+        data-privacy-scope="true"
+        className="relative w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-2xl"
+      >
         {/* Close Button */}
         <button
           type="button"

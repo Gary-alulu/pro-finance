@@ -6,6 +6,7 @@ import { useState } from "react";
 import { TrendingUp, TrendingDown, Minus, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import SkeletonLoader from "./SkeletonLoader";
+import { usePrivacy } from "@/components/providers/PrivacyProvider";
 
 export default function MetricCard({
   id,
@@ -18,7 +19,9 @@ export default function MetricCard({
   loading = false,
   href,         // optional — wraps the card in a link to a filtered view
 }) {
-  const [hideValues, setHideValues] = useState(false);
+  const { blurFigures } = usePrivacy();
+  const [localOverride, setLocalOverride] = useState(null);
+  const hideValues = localOverride !== null ? localOverride : blurFigures;
   const positiveChange = change?.startsWith("+");
   const negativeChange = change?.startsWith("-");
 
@@ -41,7 +44,7 @@ export default function MetricCard({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setHideValues((v) => !v);
+            setLocalOverride((v) => (v !== null ? !v : !blurFigures));
           }}
           className="p-1 rounded-md transition-colors opacity-0 group-hover:opacity-100"
           style={{ color: "var(--color-text-tertiary)", background: "var(--color-surface-2)" }}

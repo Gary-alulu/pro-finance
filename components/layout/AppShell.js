@@ -12,6 +12,7 @@ import TopBar from "./TopBar";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { SettingsProvider } from "@/components/providers/SettingsProvider";
+import { PrivacyProvider } from "@/components/providers/PrivacyProvider";
 
 // Command palette (framer-motion + 300 lines) is only needed once the user
 // opens it — keep it out of the shell's initial client bundle.
@@ -75,6 +76,7 @@ export default function AppShell({ user, settings, children }) {
   return (
     <ThemeProvider initialAppearance={settings?.appearance}>
       <SettingsProvider initialSettings={settings}>
+        <PrivacyProvider initialBlur={Boolean(settings?.security?.hideSensitiveValues)}>
         <ToastProvider>
         <div className="flex h-screen overflow-hidden" style={{ background: "var(--color-bg)" }}>
           {/* Skip link — first focusable element for keyboard users */}
@@ -168,6 +170,7 @@ export default function AppShell({ user, settings, children }) {
           <GlobalQuickCalculatorModal />
         </div>
         </ToastProvider>
+        </PrivacyProvider>
       </SettingsProvider>
     </ThemeProvider>
   );

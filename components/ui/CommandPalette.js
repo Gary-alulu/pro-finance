@@ -24,6 +24,7 @@ import {
   Calculator,
   Compass,
   BookOpen,
+  EyeOff,
 } from "lucide-react";
 
 const NAV_COMMANDS = [
@@ -43,6 +44,17 @@ const NAV_COMMANDS = [
 ];
 
 const ACTION_COMMANDS = [
+  {
+    id: "act-toggle-blur",
+    label: "Toggle Figure Privacy Blur (Alt+B)",
+    section: "Quick actions",
+    run: () => {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("toggle-privacy-blur"));
+      }
+    },
+    icon: EyeOff,
+  },
   {
     id: "act-quick-calc",
     label: "Open Quick Calculator (Alt+C)",

@@ -19,8 +19,11 @@ import {
   ArrowLeftRight,
   FileText,
   ReceiptText,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { usePrivacy } from "@/components/providers/PrivacyProvider";
 
 const PAGE_TITLES = {
   "/overview":        { title: "Overview",              breadcrumb: [] },
@@ -58,6 +61,7 @@ function getPageInfo(pathname) {
 
 export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
   const pathname = usePathname();
+  const { blurFigures, toggleBlurFigures } = usePrivacy();
   const { title } = getPageInfo(pathname);
   const [profileOpen, setProfileOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
@@ -180,6 +184,27 @@ export default function TopBar({ user, onMobileMenuToggle, onSearchOpen }) {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Privacy mode: blur all figures */}
+        <button
+          id="privacy-blur-btn"
+          onClick={toggleBlurFigures}
+          className="p-2 rounded-lg transition-colors"
+          style={{
+            color: blurFigures
+              ? "var(--color-warning-text)"
+              : "var(--color-text-secondary)",
+          }}
+          aria-label={blurFigures ? "Reveal figures" : "Blur figures"}
+          aria-pressed={blurFigures}
+          title={
+            blurFigures
+              ? "Reveal figures (Alt+B)"
+              : "Blur figures (Alt+B)"
+          }
+        >
+          {blurFigures ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
 
         {/* Notifications */}
         <button
